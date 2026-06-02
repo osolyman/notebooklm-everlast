@@ -5,6 +5,16 @@ clickable citations back to the exact passage, and a refusal when the evidence i
 
 > Take-home for Everlast AI. Built core-first in a few focused days.
 
+## 🔗 Live demo
+
+**[ live URL will go here ]**
+
+> ⏳ **Please allow 30–60 seconds for the demo to wake up on your first click.** It's hosted on a
+> free tier that sleeps after inactivity to keep costs at zero — once it wakes, it's responsive.
+>
+> Try this first: ask something the sources **don't** cover (e.g. *"What is the company's revenue?"*)
+> and watch it refuse instead of guessing — that's the point of the project.
+
 ---
 
 ## Why this scope (the part that matters)
