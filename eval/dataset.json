@@ -1,0 +1,26 @@
+{
+  "source": "samples/northwind-handbook.txt",
+  "cases": [
+    { "question": "How many days of paid annual leave do full-time employees get?", "expect": "answer" },
+    { "question": "When and where was Northwind Robotics founded?", "expect": "answer" },
+    { "question": "How many people does the company employ?", "expect": "answer" },
+    { "question": "What are the core collaboration hours?", "expect": "answer" },
+    { "question": "What is the one-time home-office budget for new employees?", "expect": "answer" },
+    { "question": "How many robots can the Apollo platform support per site?", "expect": "answer" },
+    { "question": "How many hours is the standard working week?", "expect": "answer" },
+    { "question": "How many days per week can employees work remotely?", "expect": "answer" },
+    { "question": "By when must carried-over leave days be used?", "expect": "answer" },
+    { "question": "How quickly must security incidents be reported?", "expect": "answer" },
+    { "question": "How often does the company run security training?", "expect": "answer" },
+    { "question": "What does the Apollo platform do?", "expect": "answer" },
+
+    { "question": "Who is the current CEO of Tesla?", "expect": "abstain" },
+    { "question": "What is the capital of France?", "expect": "abstain" },
+    { "question": "What is Northwind's annual revenue?", "expect": "abstain" },
+    { "question": "Who is the CEO of Northwind Robotics?", "expect": "abstain" },
+    { "question": "What programming language is the Apollo platform written in?", "expect": "abstain" },
+    { "question": "How much does a single Northwind warehouse robot cost?", "expect": "abstain" },
+    { "question": "What health insurance plan does Northwind offer?", "expect": "abstain" },
+    { "question": "How many vacation days do part-time contractors receive?", "expect": "abstain" }
+  ]
+}

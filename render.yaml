@@ -1,0 +1,13 @@
+# Render blueprint — deploys as a single long-running Node web service (free plan).
+# A long-running server (not serverless) is required because the vector store lives in
+# memory; serverless would lose it between requests.
+services:
+  - type: web
+    name: notebooklm-everlast
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false # set this in the Render dashboard; never commit the key
