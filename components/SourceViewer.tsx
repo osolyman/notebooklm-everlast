@@ -45,24 +45,28 @@ export function SourceViewer({
 
   return (
     <div className="fixed inset-0 z-40 flex justify-end">
-      <div className="absolute inset-0 bg-black/30" onClick={onClose} />
-      <aside className="relative z-50 flex h-full w-full max-w-xl flex-col bg-white shadow-xl">
-        <header className="flex items-center justify-between border-b border-gray-200 px-5 py-3">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <aside className="relative z-50 flex h-full w-full max-w-xl flex-col bg-white shadow-2xl dark:bg-zinc-900">
+        <header className="flex items-center justify-between border-b border-gray-200 px-5 py-3 dark:border-zinc-800">
           <div className="min-w-0">
-            <p className="text-xs font-medium uppercase tracking-wide text-gray-400">Source</p>
-            <h2 className="truncate text-sm font-semibold text-gray-800">{target.sourceTitle}</h2>
+            <p className="text-xs font-medium uppercase tracking-wide text-gray-400 dark:text-zinc-500">
+              Source
+            </p>
+            <h2 className="truncate text-sm font-semibold text-gray-800 dark:text-zinc-100">
+              {target.sourceTitle}
+            </h2>
           </div>
           <button
             onClick={onClose}
-            className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+            className="rounded p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:text-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
             aria-label="Close"
           >
             ✕
           </button>
         </header>
-        <div className="flex-1 overflow-y-auto px-5 py-4 text-sm text-gray-700">
-          {loading && <p className="text-gray-400">Loading source…</p>}
-          {error && <p className="text-red-600">{error}</p>}
+        <div className="flex-1 overflow-y-auto px-5 py-4 text-sm text-gray-700 dark:text-zinc-300">
+          {loading && <p className="text-gray-400 dark:text-zinc-500">Loading source…</p>}
+          {error && <p className="text-red-600 dark:text-red-400">{error}</p>}
           {!loading && !error && (
             <p className="whitespace-pre-wrap leading-relaxed">
               {before}

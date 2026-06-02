@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { extractPdf, extractRawText, extractUrl } from "@/lib/extract";
 import { ingest } from "@/lib/ingest";
-import { deleteSource, getSources } from "@/lib/store";
+import { clearAll, deleteSource, getSources } from "@/lib/store";
 
 export const runtime = "nodejs";
 
@@ -61,9 +61,14 @@ export async function POST(req: NextRequest) {
   }
 }
 
-/** Delete a source by ?id=. */
+/** Delete a source by ?id=, or all sources with ?all=true. */
 export async function DELETE(req: NextRequest) {
-  const id = new URL(req.url).searchParams.get("id");
+  const params = new URL(req.url).searchParams;
+  if (params.get("all") === "true") {
+    await clearAll();
+    return NextResponse.json({ ok: true });
+  }
+  const id = params.get("id");
   if (!id) return NextResponse.json({ error: "Missing id." }, { status: 400 });
   await deleteSource(id);
   return NextResponse.json({ ok: true });

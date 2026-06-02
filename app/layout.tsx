@@ -18,6 +18,9 @@ export const metadata: Metadata = {
     "A NotebookLM-style assistant that answers strictly from your sources, with citations, and abstains when evidence is insufficient.",
 };
 
+// Set the theme class before first paint to avoid a flash. Defaults to dark.
+const themeScript = `(function(){try{var t=localStorage.getItem('theme');if(t==='light'){document.documentElement.classList.remove('dark')}else{document.documentElement.classList.add('dark')}}catch(e){document.documentElement.classList.add('dark')}})()`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -26,8 +29,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
+      suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

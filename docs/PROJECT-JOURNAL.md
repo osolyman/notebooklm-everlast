@@ -95,6 +95,10 @@ Stack: **Next.js 16 (App Router, TS) + Tailwind**, one app, deployed as a long-r
 - [x] **429 retry with backoff** in the Gemini client
 - [x] **One-click sample document + starter questions** — reviewers can try it instantly; one
       starter question deliberately triggers abstention, so the differentiator is impossible to miss
+- [x] **Dark/light theme** — dark by default with a toggle (persisted, no flash on load)
+- [x] **Save & re-ask** — save any answer or FAQ to a Saved list (localStorage); "Ask in chat"
+      runs an FAQ question through the live grounded chat
+- [x] **UX polish** — clear-chat, clear-FAQ, clear-all-sources, refined empty/loading states
 - [x] **Evaluation harness** (`npm run eval`) — measures grounding + abstention accuracy
 - [x] **Deployed to a public URL** — https://notebooklm-everlast.onrender.com (Render free tier),
       verified live end-to-end (ingest → grounded answer with citations → abstention)

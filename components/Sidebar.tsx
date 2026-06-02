@@ -5,6 +5,7 @@ import {
   addPdfSource,
   addTextSource,
   addUrlSource,
+  clearAllSources,
   deleteSource,
   type SourceSummary,
 } from "@/lib/api";
@@ -50,15 +51,31 @@ export function Sidebar({
     }
   }
 
+  const inputCls =
+    "min-w-0 flex-1 rounded-md border border-gray-300 px-2.5 py-2 text-sm text-gray-800 placeholder:text-gray-400 focus:border-indigo-400 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-500";
+
   return (
     <div className="flex h-full flex-col">
-      <div className="border-b border-gray-200 px-4 py-3">
-        <h2 className="text-sm font-semibold text-gray-700">Sources</h2>
-        <p className="mt-0.5 text-xs text-gray-400">Everything the assistant is allowed to use.</p>
+      <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3 dark:border-zinc-800">
+        <div>
+          <h2 className="text-sm font-semibold text-gray-700 dark:text-zinc-200">Sources</h2>
+          <p className="mt-0.5 text-xs text-gray-400 dark:text-zinc-500">
+            What the assistant may use.
+          </p>
+        </div>
+        {sources.length > 0 && (
+          <button
+            onClick={() => run("clearall", clearAllSources)}
+            disabled={!!busy}
+            className="text-xs text-gray-400 hover:text-red-500 disabled:opacity-50 dark:text-zinc-500 dark:hover:text-red-400"
+          >
+            {busy === "clearall" ? "Clearing…" : "Clear all"}
+          </button>
+        )}
       </div>
 
       {/* Add controls */}
-      <div className="space-y-2 border-b border-gray-200 px-4 py-3">
+      <div className="space-y-2 border-b border-gray-200 px-4 py-3 dark:border-zinc-800">
         <input
           ref={fileRef}
           type="file"
@@ -73,7 +90,7 @@ export function Sidebar({
         <button
           onClick={() => fileRef.current?.click()}
           disabled={!!busy}
-          className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
         >
           {busy === "pdf" ? "Reading PDF…" : "＋ Upload PDF"}
         </button>
@@ -83,7 +100,7 @@ export function Sidebar({
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             placeholder="Paste a web URL"
-            className="min-w-0 flex-1 rounded-md border border-gray-300 px-2.5 py-2 text-sm focus:border-indigo-400 focus:outline-none"
+            className={inputCls}
           />
           <button
             onClick={() =>
@@ -102,24 +119,24 @@ export function Sidebar({
         {!showPaste ? (
           <button
             onClick={() => setShowPaste(true)}
-            className="text-xs font-medium text-indigo-600 hover:underline"
+            className="text-xs font-medium text-indigo-600 hover:underline dark:text-indigo-400"
           >
             ＋ Paste text instead
           </button>
         ) : (
-          <div className="space-y-1.5 rounded-md bg-gray-50 p-2">
+          <div className="space-y-1.5 rounded-md bg-gray-50 p-2 dark:bg-zinc-800/60">
             <input
               value={pasteTitle}
               onChange={(e) => setPasteTitle(e.target.value)}
               placeholder="Title"
-              className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm focus:outline-none"
+              className={inputCls + " w-full"}
             />
             <textarea
               value={pasteText}
               onChange={(e) => setPasteText(e.target.value)}
               placeholder="Paste your text…"
               rows={4}
-              className="w-full rounded border border-gray-300 px-2 py-1.5 text-sm focus:outline-none"
+              className={inputCls + " w-full"}
             />
             <div className="flex gap-1.5">
               <button
@@ -138,7 +155,7 @@ export function Sidebar({
               </button>
               <button
                 onClick={() => setShowPaste(false)}
-                className="rounded px-3 py-1.5 text-sm text-gray-500 hover:bg-gray-100"
+                className="rounded px-3 py-1.5 text-sm text-gray-500 hover:bg-gray-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
               >
                 Cancel
               </button>
@@ -146,18 +163,18 @@ export function Sidebar({
           </div>
         )}
 
-        {error && <p className="text-xs text-red-600">{error}</p>}
+        {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
       </div>
 
       {/* List */}
       <div className="flex-1 overflow-y-auto px-2 py-2">
         {sources.length === 0 ? (
           <div className="px-2 py-6 text-center">
-            <p className="text-xs text-gray-400">No sources yet.</p>
+            <p className="text-xs text-gray-400 dark:text-zinc-500">No sources yet.</p>
             <button
               onClick={() => run("sample", onLoadSample)}
               disabled={!!busy}
-              className="mt-2 text-xs font-medium text-indigo-600 hover:underline disabled:opacity-50"
+              className="mt-2 text-xs font-medium text-indigo-600 hover:underline disabled:opacity-50 dark:text-indigo-400"
             >
               {busy === "sample" ? "Loading sample…" : "Load a sample document"}
             </button>
@@ -167,7 +184,7 @@ export function Sidebar({
             {sources.map((s) => (
               <li
                 key={s.id}
-                className="group flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-gray-50"
+                className="group flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-zinc-800/60"
               >
                 <input
                   type="checkbox"
@@ -176,12 +193,15 @@ export function Sidebar({
                   className="h-4 w-4 shrink-0 accent-indigo-600"
                 />
                 <span className="shrink-0">{TYPE_ICON[s.type]}</span>
-                <span className="min-w-0 flex-1 truncate text-sm text-gray-700" title={s.title}>
+                <span
+                  className="min-w-0 flex-1 truncate text-sm text-gray-700 dark:text-zinc-300"
+                  title={s.title}
+                >
                   {s.title}
                 </span>
                 <button
                   onClick={() => run(`del-${s.id}`, () => deleteSource(s.id))}
-                  className="shrink-0 text-gray-300 opacity-0 transition hover:text-red-500 group-hover:opacity-100"
+                  className="shrink-0 text-gray-300 opacity-0 transition hover:text-red-500 group-hover:opacity-100 dark:text-zinc-600 dark:hover:text-red-400"
                   aria-label="Delete source"
                 >
                   ✕

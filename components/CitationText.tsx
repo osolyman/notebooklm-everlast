@@ -24,7 +24,6 @@ export function CitationText({
   onCite: (target: CiteTarget) => void;
 }) {
   const byN = new Map(evidence.map((e) => [e.n, e]));
-  // Split on [1], [2][3], etc., keeping the delimiters.
   const parts = text.split(/(\[\d+\])/g);
 
   return (
@@ -42,7 +41,7 @@ export function CitationText({
                   onCite({ sourceId: e.sourceId, sourceTitle: e.sourceTitle, start: e.start, end: e.end })
                 }
                 title={`${e.sourceTitle} — click to view`}
-                className="mx-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded bg-indigo-100 px-1 align-baseline text-xs font-semibold text-indigo-700 hover:bg-indigo-200"
+                className="mx-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded bg-indigo-100 px-1 align-baseline text-xs font-semibold text-indigo-700 hover:bg-indigo-200 dark:bg-indigo-500/20 dark:text-indigo-300 dark:hover:bg-indigo-500/30"
               >
                 {n}
               </button>

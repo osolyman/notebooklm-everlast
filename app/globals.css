@@ -1,8 +1,16 @@
 @import "tailwindcss";
 
+/* Class-based dark mode: `dark:` utilities apply when <html> has the `dark` class. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #f7f7f8;
   --foreground: #1f1f23;
+}
+
+.dark {
+  --background: #0a0a0b;
+  --foreground: #ececee;
 }
 
 @theme inline {
@@ -26,6 +34,19 @@ body {
 /* Highlighted citation passage in the source viewer. */
 mark.citation-hit {
   background: #fde68a;
+  color: #1f1f23;
   border-radius: 2px;
   padding: 1px 0;
+}
+.dark mark.citation-hit {
+  background: #b8860b;
+  color: #fff;
+}
+
+/* Thin, theme-aware scrollbars. */
+* {
+  scrollbar-width: thin;
+}
+.dark * {
+  scrollbar-color: #3f3f46 transparent;
 }

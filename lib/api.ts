@@ -53,6 +53,10 @@ export async function deleteSource(id: string): Promise<void> {
   await json(await fetch(`/api/sources?id=${encodeURIComponent(id)}`, { method: "DELETE" }));
 }
 
+export async function clearAllSources(): Promise<void> {
+  await json(await fetch(`/api/sources?all=true`, { method: "DELETE" }));
+}
+
 export async function getSource(id: string): Promise<Source> {
   return (await json<{ source: Source }>(await fetch(`/api/sources/${id}`))).source;
 }
