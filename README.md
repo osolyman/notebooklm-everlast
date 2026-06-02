@@ -7,7 +7,7 @@ clickable citations back to the exact passage, and a refusal when the evidence i
 
 ## 🔗 Live demo
 
-**[ live URL will go here ]**
+**https://notebooklm-everlast.onrender.com**
 
 > ⏳ **Please allow 30–60 seconds for the demo to wake up on your first click.** It's hosted on a
 > free tier that sleeps after inactivity to keep costs at zero — once it wakes, it's responsive.

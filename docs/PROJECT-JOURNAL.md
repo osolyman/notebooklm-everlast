@@ -94,7 +94,8 @@ Stack: **Next.js 16 (App Router, TS) + Tailwind**, one app, deployed as a long-r
 - [x] **3-pane UI** — Sources | Chat | Insights, NotebookLM-style
 - [x] **429 retry with backoff** in the Gemini client
 - [x] **Evaluation harness** (`npm run eval`) — measures grounding + abstention accuracy
-- [ ] Deploy to a public URL (next)
+- [x] **Deployed to a public URL** — https://notebooklm-everlast.onrender.com (Render free tier),
+      verified live end-to-end (ingest → grounded answer with citations → abstention)
 - [ ] _Optional / if time:_ YouTube ingestion, agentic multi-hop retrieval, streaming responses
 
 ## 6. Things I discovered through testing (great video material)
