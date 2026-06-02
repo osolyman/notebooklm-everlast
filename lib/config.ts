@@ -20,6 +20,10 @@ export const TOP_K = Number(process.env.TOP_K ?? 6);
  */
 export const SIMILARITY_FLOOR = Number(process.env.SIMILARITY_FLOOR ?? 0.55);
 
-/** Target chunk size and overlap, in characters. */
-export const CHUNK_SIZE = Number(process.env.CHUNK_SIZE ?? 1100);
-export const CHUNK_OVERLAP = Number(process.env.CHUNK_OVERLAP ?? 150);
+/**
+ * Target chunk size and overlap, in characters. Kept fairly small so each chunk stays on
+ * one topic — this makes citations land on a tight, relevant passage instead of a blob
+ * spanning several sections. Overlap only applies when a single paragraph exceeds the size.
+ */
+export const CHUNK_SIZE = Number(process.env.CHUNK_SIZE ?? 600);
+export const CHUNK_OVERLAP = Number(process.env.CHUNK_OVERLAP ?? 100);
