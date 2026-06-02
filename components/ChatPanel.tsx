@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ask } from "@/lib/api";
 import type { ChatResponse } from "@/lib/types";
-import { SAMPLE_QUESTIONS } from "@/lib/sample";
+import type { Starter } from "@/lib/sample";
 import { CitationText, type CiteTarget } from "./CitationText";
 
 interface UserMsg {
@@ -29,6 +29,7 @@ export function ChatPanel({
   onLoadSample,
   onSave,
   pendingAsk,
+  starters,
 }: {
   selectedIds: string[];
   hasSources: boolean;
@@ -36,6 +37,7 @@ export function ChatPanel({
   onLoadSample: () => Promise<void>;
   onSave: (question: string, answer: string) => void;
   pendingAsk: PendingAsk | null;
+  starters: Starter[];
 }) {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
@@ -99,7 +101,12 @@ export function ChatPanel({
 
       <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto px-5 py-4">
         {messages.length === 0 && (
-          <EmptyState hasSources={hasSources} onLoadSample={onLoadSample} onPick={(q) => send(q)} />
+          <EmptyState
+            hasSources={hasSources}
+            starters={starters}
+            onLoadSample={onLoadSample}
+            onPick={(q) => send(q)}
+          />
         )}
         {messages.map((m, i) =>
           m.role === "user" ? (
@@ -233,10 +240,12 @@ function AssistantBubble({
 
 function EmptyState({
   hasSources,
+  starters,
   onLoadSample,
   onPick,
 }: {
   hasSources: boolean;
+  starters: Starter[];
   onLoadSample: () => Promise<void>;
   onPick: (q: string) => void;
 }) {
@@ -278,7 +287,7 @@ function EmptyState({
           <p className="text-center text-xs font-medium text-gray-400 dark:text-zinc-500">
             Try one of these:
           </p>
-          {SAMPLE_QUESTIONS.map((s) => (
+          {starters.map((s) => (
             <button
               key={s.q}
               onClick={() => onPick(s.q)}

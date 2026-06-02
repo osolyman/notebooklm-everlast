@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { buildFaq } from "@/lib/api";
+import { buildFaq, buildSummary } from "@/lib/api";
 import type { FaqItem, RetrievedChunk } from "@/lib/types";
 import type { SavedItem } from "@/lib/useSaved";
 import { CitationText, type CiteTarget } from "./CitationText";
@@ -30,6 +30,26 @@ export function InsightsPanel({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+
+  // Summary state.
+  const [summary, setSummary] = useState<string>("");
+  const [summaryEvidence, setSummaryEvidence] = useState<RetrievedChunk[]>([]);
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const [summaryError, setSummaryError] = useState<string | null>(null);
+
+  async function generateSummary() {
+    setSummaryLoading(true);
+    setSummaryError(null);
+    try {
+      const res = await buildSummary(selectedIds);
+      setSummary(res.summary);
+      setSummaryEvidence(res.evidence);
+    } catch (e) {
+      setSummaryError(e instanceof Error ? e.message : "Failed to generate summary.");
+    } finally {
+      setSummaryLoading(false);
+    }
+  }
 
   async function generate() {
     setLoading(true);
@@ -71,6 +91,58 @@ export function InsightsPanel({
       </div>
 
       <div className="flex-1 space-y-4 overflow-y-auto px-5 py-4">
+        {/* Summary card */}
+        <div className="rounded-lg border border-gray-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <h3 className="text-sm font-semibold text-gray-800 dark:text-zinc-100">Summary</h3>
+              <p className="mt-0.5 text-xs text-gray-400 dark:text-zinc-500">
+                A grounded overview of the whole document.
+              </p>
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              {summary && (
+                <button
+                  onClick={() => {
+                    setSummary("");
+                    setSummaryEvidence([]);
+                    setSummaryError(null);
+                  }}
+                  className="text-xs text-gray-400 hover:text-gray-600 dark:text-zinc-500 dark:hover:text-zinc-300"
+                >
+                  Clear
+                </button>
+              )}
+              <button
+                onClick={generateSummary}
+                disabled={!hasSources || summaryLoading}
+                className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+              >
+                {summaryLoading ? "Summarizing…" : summary ? "Regenerate" : "Generate"}
+              </button>
+            </div>
+          </div>
+
+          {summaryError && <p className="mt-3 text-sm text-red-600 dark:text-red-400">{summaryError}</p>}
+
+          {summary && (
+            <div className="mt-3">
+              <p className="text-sm text-gray-600 dark:text-zinc-300">
+                <CitationText text={summary} evidence={summaryEvidence} onCite={onCite} />
+              </p>
+              <div className="mt-2 flex items-center gap-3">
+                <button
+                  onClick={() => onSave("Summary of the document", summary)}
+                  disabled={isSaved("Summary of the document")}
+                  className="text-xs font-medium text-gray-400 hover:text-indigo-600 disabled:text-indigo-500 dark:text-zinc-500 dark:hover:text-indigo-400"
+                >
+                  {isSaved("Summary of the document") ? "★ Saved" : "☆ Save"}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Auto-FAQ card */}
         <div className="rounded-lg border border-gray-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
           <div className="flex items-center justify-between gap-2">

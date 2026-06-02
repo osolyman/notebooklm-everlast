@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { listSources, seedSample, type SourceSummary } from "@/lib/api";
 import { useSaved } from "@/lib/useSaved";
+import { GENERIC_QUESTIONS, SAMPLE_QUESTIONS, SAMPLE_TITLE } from "@/lib/sample";
 import { Sidebar } from "@/components/Sidebar";
 import { ChatPanel, type PendingAsk } from "@/components/ChatPanel";
 import { InsightsPanel } from "@/components/InsightsPanel";
@@ -51,6 +52,14 @@ export default function Home() {
   const selectedIds = useMemo(() => [...selected], [selected]);
   const hasSources = selectedIds.length > 0;
 
+  // Show sample-specific starters only when the sample is the only thing selected;
+  // otherwise show generic, document-agnostic prompts.
+  const starters = useMemo(() => {
+    const titles = sources.filter((s) => selected.has(s.id)).map((s) => s.title);
+    const onlySample = titles.length > 0 && titles.every((t) => t === SAMPLE_TITLE);
+    return onlySample ? SAMPLE_QUESTIONS : GENERIC_QUESTIONS;
+  }, [sources, selected]);
+
   return (
     <div className="flex h-screen flex-col bg-gray-50 dark:bg-zinc-950">
       <header className="flex items-center gap-2 border-b border-gray-200 bg-white px-5 py-3 dark:border-zinc-800 dark:bg-zinc-900">
@@ -82,6 +91,7 @@ export default function Home() {
             onLoadSample={loadSample}
             onSave={saveItem}
             pendingAsk={pendingAsk}
+            starters={starters}
           />
         </section>
         <section className="hidden min-h-0 bg-white md:block dark:bg-zinc-900">

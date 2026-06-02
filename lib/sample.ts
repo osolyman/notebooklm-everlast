@@ -39,10 +39,21 @@ health, and routes robots around obstacles in real time. Apollo supports up to 5
 and exposes a REST API for integration with third-party warehouse-management systems. A typical
 deployment reduces manual picking time by roughly 40%.`;
 
-/** Starter questions shown to first-time users. The last one deliberately has no answer
- *  in the sample, so a reviewer immediately sees the abstention behavior. */
-export const SAMPLE_QUESTIONS: { q: string; kind: "grounded" | "abstains" }[] = [
+export interface Starter {
+  q: string;
+  kind: "grounded" | "abstains";
+}
+
+/** Starter questions for the bundled sample. The last one deliberately has no answer in
+ *  the sample, so a reviewer immediately sees the abstention behavior. */
+export const SAMPLE_QUESTIONS: Starter[] = [
   { q: "How many days of paid annual leave do employees get?", kind: "grounded" },
   { q: "What does the Apollo platform do?", kind: "grounded" },
   { q: "What is Northwind's annual revenue?", kind: "abstains" },
+];
+
+/** Generic starters that work for any uploaded document (retrieval-friendly). */
+export const GENERIC_QUESTIONS: Starter[] = [
+  { q: "What is this document about?", kind: "grounded" },
+  { q: "What are the main topics covered?", kind: "grounded" },
 ];

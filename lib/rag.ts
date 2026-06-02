@@ -7,8 +7,11 @@ const GROUNDING_RULES = `You are a careful research assistant for a NotebookLM-s
 You answer ONLY from the numbered SOURCES provided. Rules:
 - Use only information present in the sources. Never use outside knowledge.
 - Cite every claim inline with bracketed numbers like [1] or [2][4], matching the source numbers.
-- If the sources do not contain enough information to answer, set "sufficient_evidence" to false
-  and briefly say what is missing. Do NOT guess or fill gaps.
+- If the user asks for a summary or overview, summarize the information in the provided sources
+  (this IS answerable from the sources — do not refuse it).
+- If the sources do not contain enough information to answer a specific question, set
+  "sufficient_evidence" to false and briefly say what is missing. Do NOT guess or fill gaps.
+- Always respond in the same language as the user's question.
 - Be concise and factual.`;
 
 function renderSources(evidence: RetrievedChunk[]): string {
@@ -88,6 +91,27 @@ export async function answerQuestion(
     evidence,
     citations: Array.from(new Set(valid)),
   };
+}
+
+/**
+ * Generate a grounded, cited summary of the sources. Uses a representative spread of
+ * chunks (not top-k retrieval) so the summary reflects the whole document — this is why a
+ * "summarize this" request belongs here rather than in the Q&A path.
+ */
+export async function generateSummary(
+  sourceIds?: string[],
+): Promise<{ summary: string; evidence: RetrievedChunk[] }> {
+  const evidence = await sampleChunks(20, sourceIds);
+  if (evidence.length === 0) return { summary: "", evidence: [] };
+
+  const prompt = `SOURCES:\n${renderSources(evidence)}\n\nWrite a concise summary (4–7 sentences) of what these sources cover. Ground every statement in the sources and cite the source numbers inline.`;
+  const schema = {
+    type: "OBJECT",
+    properties: { summary: { type: "STRING" } },
+    required: ["summary"],
+  };
+  const result = await generateJson<{ summary: string }>(prompt, GROUNDING_RULES, schema);
+  return { summary: (result.summary ?? "").trim(), evidence };
 }
 
 /**

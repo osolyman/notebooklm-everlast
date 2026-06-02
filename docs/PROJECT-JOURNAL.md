@@ -99,6 +99,10 @@ Stack: **Next.js 16 (App Router, TS) + Tailwind**, one app, deployed as a long-r
 - [x] **Save & re-ask** — save any answer or FAQ to a Saved list (localStorage); "Ask in chat"
       runs an FAQ question through the live grounded chat
 - [x] **UX polish** — clear-chat, clear-FAQ, clear-all-sources, refined empty/loading states
+- [x] **Summary generator** — grounded, cited whole-document summary (uses representative chunk
+      spread, not top-k, so "summarize this" works properly)
+- [x] **Adaptive starter questions** — sample-specific for the demo doc, generic for user uploads
+- [x] **Multilingual answers** — responds in the language of the question (tested with Arabic)
 - [x] **Evaluation harness** (`npm run eval`) — measures grounding + abstention accuracy
 - [x] **Deployed to a public URL** — https://notebooklm-everlast.onrender.com (Render free tier),
       verified live end-to-end (ingest → grounded answer with citations → abstention)
@@ -156,6 +160,13 @@ question, so Gate 1 stays conservative (no false refusals) and Gate 2 does the s
   citation highlights exactly its own section. → Video line: *"A citation that points at four
   sections at once isn't a citation. I tuned the chunking so each one lands on the precise passage —
   and verified the offsets map back to the source exactly."*
+
+- **Summarization is a different retrieval problem than Q&A.** Testing with a real lecture PDF, a
+  "summarize this file" request failed — the Q&A path retrieves only the top-k chunks for a *specific*
+  query, which is wrong for a whole-document summary. Fix: a dedicated Summary feature that uses a
+  representative spread of chunks across the document (same approach as the FAQ), plus a grounding
+  rule so the chat no longer refuses summary/overview requests. → Video line: *"A summary isn't a
+  top-k retrieval — it needs coverage of the whole doc. I separated those two paths."*
 
 ## 7. Video / interview talking points
 

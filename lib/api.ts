@@ -80,3 +80,14 @@ export async function buildFaq(
   });
   return json<{ faqs: FaqItem[]; evidence: RetrievedChunk[] }>(res);
 }
+
+export async function buildSummary(
+  sourceIds: string[],
+): Promise<{ summary: string; evidence: RetrievedChunk[] }> {
+  const res = await fetch("/api/summary", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ sourceIds }),
+  });
+  return json<{ summary: string; evidence: RetrievedChunk[] }>(res);
+}
