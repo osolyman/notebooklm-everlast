@@ -16,9 +16,9 @@ function ai(): GoogleGenAI {
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /**
- * Retry on transient rate-limit (429) errors. The free tier allows only a few requests
- * per minute, so under any burst we honor the server's suggested retry delay (or back off)
- * instead of failing. This keeps the deployed app resilient when a reviewer clicks around.
+ * Retry on transient per-minute rate-limit (429) errors. Fails fast on daily quota
+ * exhaustion (PerDay) since retrying won't help until midnight. This keeps the deployed
+ * app resilient when a reviewer clicks around quickly, without hanging for minutes.
  */
 async function withRetry<T>(fn: () => Promise<T>, attempts = 4): Promise<T> {
   let lastErr: unknown;
@@ -29,7 +29,14 @@ async function withRetry<T>(fn: () => Promise<T>, attempts = 4): Promise<T> {
       lastErr = err;
       const msg = err instanceof Error ? err.message : String(err);
       const is429 = /429|RESOURCE_EXHAUSTED|rate limit|quota/i.test(msg);
-      if (!is429 || i === attempts - 1) throw err;
+      if (!is429) throw err;
+      // Daily quota exhaustion cannot be retried — fail fast with a clear message.
+      if (/PerDay|per_day|daily/i.test(msg)) {
+        throw new Error(
+          "Daily API quota reached on the free tier. Please wait until midnight Pacific Time (when quotas reset) and try again. This is a free-tier limit of the Gemini API, not an app bug.",
+        );
+      }
+      if (i === attempts - 1) throw err;
       const suggested = msg.match(/retry(?:Delay)?["\s:]*?([\d.]+)\s*s/i);
       const waitMs = suggested ? Math.ceil(parseFloat(suggested[1]) * 1000) + 500 : (i + 1) * 15000;
       await sleep(waitMs);
