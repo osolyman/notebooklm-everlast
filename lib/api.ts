@@ -44,6 +44,11 @@ export async function addPdfSource(file: File): Promise<SourceSummary> {
   return (await json<{ source: SourceSummary }>(res)).source;
 }
 
+export async function seedSample(): Promise<SourceSummary> {
+  const res = await fetch("/api/seed", { method: "POST" });
+  return (await json<{ source: SourceSummary }>(res)).source;
+}
+
 export async function deleteSource(id: string): Promise<void> {
   await json(await fetch(`/api/sources?id=${encodeURIComponent(id)}`, { method: "DELETE" }));
 }

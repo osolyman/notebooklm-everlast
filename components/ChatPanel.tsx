@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { ask } from "@/lib/api";
 import type { ChatResponse } from "@/lib/types";
+import { SAMPLE_QUESTIONS } from "@/lib/sample";
 import { CitationText, type CiteTarget } from "./CitationText";
 
 interface UserMsg {
@@ -19,10 +20,12 @@ export function ChatPanel({
   selectedIds,
   hasSources,
   onCite,
+  onLoadSample,
 }: {
   selectedIds: string[];
   hasSources: boolean;
   onCite: (t: CiteTarget) => void;
+  onLoadSample: () => Promise<void>;
 }) {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
@@ -30,8 +33,8 @@ export function ChatPanel({
   const [error, setError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  async function send() {
-    const q = input.trim();
+  async function send(textArg?: string) {
+    const q = (textArg ?? input).trim();
     if (!q || loading) return;
     setInput("");
     setError(null);
@@ -60,7 +63,7 @@ export function ChatPanel({
 
       <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto px-5 py-4">
         {messages.length === 0 && (
-          <EmptyState hasSources={hasSources} />
+          <EmptyState hasSources={hasSources} onLoadSample={onLoadSample} onPick={(q) => send(q)} />
         )}
         {messages.map((m, i) =>
           m.role === "user" ? (
@@ -98,7 +101,7 @@ export function ChatPanel({
             className="max-h-32 min-h-[42px] flex-1 resize-none rounded-xl border border-gray-300 px-3 py-2.5 text-sm focus:border-indigo-400 focus:outline-none disabled:bg-gray-50"
           />
           <button
-            onClick={send}
+            onClick={() => send()}
             disabled={!hasSources || loading || !input.trim()}
             className="h-[42px] shrink-0 rounded-xl bg-indigo-600 px-4 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
           >
@@ -162,17 +165,65 @@ function AssistantBubble({ data, onCite }: { data: ChatResponse; onCite: (t: Cit
   );
 }
 
-function EmptyState({ hasSources }: { hasSources: boolean }) {
+function EmptyState({
+  hasSources,
+  onLoadSample,
+  onPick,
+}: {
+  hasSources: boolean;
+  onLoadSample: () => Promise<void>;
+  onPick: (q: string) => void;
+}) {
+  const [loadingSample, setLoadingSample] = useState(false);
+
   return (
     <div className="mx-auto mt-10 max-w-md text-center">
       <div className="text-3xl">💬</div>
       <h3 className="mt-2 text-sm font-semibold text-gray-700">
-        {hasSources ? "Ask your sources anything" : "Add a source to get started"}
+        {hasSources ? "Ask your sources anything" : "Try it in one click"}
       </h3>
       <p className="mt-1 text-xs text-gray-400">
         Every answer cites the exact passages it used. Ask something your sources don&apos;t cover and
         watch the assistant refuse rather than guess.
       </p>
+
+      {!hasSources ? (
+        <div className="mt-5">
+          <button
+            onClick={async () => {
+              setLoadingSample(true);
+              try {
+                await onLoadSample();
+              } finally {
+                setLoadingSample(false);
+              }
+            }}
+            disabled={loadingSample}
+            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+          >
+            {loadingSample ? "Loading sample…" : "📄 Load a sample document"}
+          </button>
+          <p className="mt-2 text-xs text-gray-400">…or add your own PDF, URL, or text on the left.</p>
+        </div>
+      ) : (
+        <div className="mt-5 flex flex-col items-stretch gap-2 text-left">
+          <p className="text-center text-xs font-medium text-gray-400">Try one of these:</p>
+          {SAMPLE_QUESTIONS.map((s) => (
+            <button
+              key={s.q}
+              onClick={() => onPick(s.q)}
+              className="flex items-center justify-between gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 hover:border-indigo-300 hover:bg-indigo-50"
+            >
+              <span>{s.q}</span>
+              {s.kind === "abstains" && (
+                <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase text-amber-700">
+                  will refuse
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

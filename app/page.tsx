@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { listSources, type SourceSummary } from "@/lib/api";
+import { listSources, seedSample, type SourceSummary } from "@/lib/api";
 import { Sidebar } from "@/components/Sidebar";
 import { ChatPanel } from "@/components/ChatPanel";
 import { InsightsPanel } from "@/components/InsightsPanel";
@@ -29,6 +29,11 @@ export default function Home() {
     refresh();
   }, [refresh]);
 
+  const loadSample = useCallback(async () => {
+    await seedSample();
+    await refresh();
+  }, [refresh]);
+
   const toggle = (id: string) =>
     setSelected((prev) => {
       const next = new Set(prev);
@@ -52,10 +57,21 @@ export default function Home() {
 
       <main className="grid min-h-0 flex-1 grid-cols-1 md:grid-cols-[280px_1fr_360px]">
         <section className="min-h-0 border-r border-gray-200 bg-white">
-          <Sidebar sources={sources} selected={selected} onToggle={toggle} onChanged={refresh} />
+          <Sidebar
+            sources={sources}
+            selected={selected}
+            onToggle={toggle}
+            onChanged={refresh}
+            onLoadSample={loadSample}
+          />
         </section>
         <section className="min-h-0 border-r border-gray-200 bg-gray-50">
-          <ChatPanel selectedIds={selectedIds} hasSources={hasSources} onCite={setViewer} />
+          <ChatPanel
+            selectedIds={selectedIds}
+            hasSources={hasSources}
+            onCite={setViewer}
+            onLoadSample={loadSample}
+          />
         </section>
         <section className="hidden min-h-0 bg-white md:block">
           <InsightsPanel selectedIds={selectedIds} hasSources={hasSources} onCite={setViewer} />

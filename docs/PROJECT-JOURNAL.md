@@ -93,6 +93,8 @@ Stack: **Next.js 16 (App Router, TS) + Tailwind**, one app, deployed as a long-r
 - [x] **Proactive auto-FAQ** — grounded, cited Q&A generated from the sources ("work with info, not just search")
 - [x] **3-pane UI** — Sources | Chat | Insights, NotebookLM-style
 - [x] **429 retry with backoff** in the Gemini client
+- [x] **One-click sample document + starter questions** — reviewers can try it instantly; one
+      starter question deliberately triggers abstention, so the differentiator is impossible to miss
 - [x] **Evaluation harness** (`npm run eval`) — measures grounding + abstention accuracy
 - [x] **Deployed to a public URL** — https://notebooklm-everlast.onrender.com (Render free tier),
       verified live end-to-end (ingest → grounded answer with citations → abstention)
