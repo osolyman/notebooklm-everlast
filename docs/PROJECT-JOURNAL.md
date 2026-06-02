@@ -102,6 +102,13 @@ Stack: **Next.js 16 (App Router, TS) + Tailwind**, one app, deployed as a long-r
 
 ## 6. Things I discovered through testing (great video material)
 
+- **The daily quota is the binding constraint, not the per-minute limit.** Both `gemini-2.5-flash`
+  and `gemini-2.5-flash-lite` have a **20 requests/day** daily cap on this free key. Our eval (20
+  questions) plus live tests exhausted the day's budget. Fix: the retry logic now detects
+  `PerDayPerProjectPerModel` quota errors and **fails fast** with a clear message instead of
+  retrying for ~4 minutes silently. → Video note: *"I found both the per-minute and per-day limits
+  through testing and handled each differently — fast-fail for daily (unrecoverable), retry for
+  per-minute (transient)."* For a multi-reviewer demo, generate a second free key as a spare.
 - **The free-tier rate limit is real and tight.** `gemini-2.5-flash` was capped at **20 requests/day**
   on this key (and 5/min). I discovered this by *running my own eval and watching it 429*. Two fixes:
   (1) added **429 retry with backoff** so the deployed app stays up under bursts; (2) switched the
