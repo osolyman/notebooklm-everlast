@@ -145,6 +145,14 @@ Why two gates (abstention attribution):
 In-scope similarity ranged 0.575–0.816; the floor at 0.55 sits just under the lowest legitimate
 question, so Gate 1 stays conservative (no false refusals) and Gate 2 does the semantic work.
 
+- **Citation precision is a chunking problem.** First version chunked the sample into 3 coarse
+  ~1100-char chunks, so one citation spanned 4 sections and two unrelated answers cited the *same*
+  chunk — technically correct, useless in practice. I switched to **paragraph-aware chunking** (pack
+  whole sections up to a smaller size); the sample now yields 6 topic-aligned chunks, so each
+  citation highlights exactly its own section. → Video line: *"A citation that points at four
+  sections at once isn't a citation. I tuned the chunking so each one lands on the precise passage —
+  and verified the offsets map back to the source exactly."*
+
 ## 7. Video / interview talking points
 
 Open with the **thesis**, not a feature tour:
