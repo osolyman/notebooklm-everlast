@@ -228,7 +228,41 @@ These are deliberate, understood trade-offs — not things I missed:
 What works rock-solid everywhere: **PDF, pasted text, and normal server-rendered article URLs.**
 Demo strategy: lean on those; show YouTube locally; mention the rest as a known, costed upgrade path.
 
-## 10. Running it locally (for a live walkthrough with reviewers)
+## 10. POC → production: the framing to lead with (KEY for the video/interview)
+
+**The one-sentence frame:** *"This is a proof-of-concept built to validate the idea quickly and at
+zero cost — to prove the core works and can be trusted. Every constraint I chose was about maximizing
+learning per hour and per euro, not because I don't know the production path. Once the concept earns
+trust, each layer has a clear, costed upgrade path — and then we optimize and expand."*
+
+This reframes every "limitation" as a **deliberate decision with a known next step** — which reads as
+seniority, not as gaps. For each choice: *what I used → why (cost/time/scope) → how it becomes
+production-grade once it's trusted and funded.*
+
+| Area | What I used (POC) | Why | Production version (once trusted/funded) |
+|---|---|---|---|
+| Vector store | In-memory + JSON file | Free, instant, transparent on camera | Managed vector DB (pgvector / Pinecone / Weaviate): scale, persistence, concurrency |
+| Hosting | Render free tier | €0, gets a public URL | Paid instance / autoscaling: no cold starts, persistent disk, SLAs |
+| LLM + embeddings | Gemini **free** tier | €0, no card, strong models | Paid tier or self-host: higher/again no daily quota, lower latency, data controls |
+| Auth & multi-tenant | None | Out of scope to prove the idea | Accounts, per-user workspaces, sharing, role-based access |
+| Web / YouTube ingest | Direct fetch + scrape | Free; works for the common cases | Managed scraping + transcript APIs (Firecrawl / Supadata) + residential proxies |
+| Persistence | Ephemeral (resets on restart) | Fine for a single-session demo | Durable storage + backups + migrations |
+| Chat | Single-shot, non-streaming | Simpler, reliable to build | Streaming responses, conversation memory, agentic multi-hop retrieval |
+| Evaluation | 20-question harness | Enough to prove grounding/abstention | Continuous eval suite, regression gates, online quality monitoring |
+| Observability & security | Minimal | Not needed to validate the concept | Logging/tracing, cost monitoring, tenant isolation, PII handling, compliance |
+
+**Lines you can say almost verbatim:**
+- *"I optimized for trust first: prove the answers are grounded, cited, and honest. Everything else is
+  a known upgrade, not a missing piece."*
+- *"I used free tiers everywhere on purpose — to show the idea is viable at essentially zero cost
+  before anyone spends real money on infrastructure."*
+- *"The in-memory store is the clearest example: at this scale it's identical in quality to a vector
+  DB and I can explain exactly how retrieval works — and the day we need scale, it's a swap, not a
+  rewrite."*
+- *"Once you trust the system is safe and works, the same architecture optimizes and expands — better
+  infra, more sources, streaming, agentic retrieval, multi-user."*
+
+## 11. Running it locally (for a live walkthrough with reviewers)
 
 Everything was developed and tested locally first; YouTube and any blocked sites work locally because
 requests come from a residential IP. To run a full live demo (e.g. screen-share in the next round):
@@ -247,7 +281,7 @@ npm run dev          # open http://localhost:3000
 - How testing was done throughout: ingest via the API, then verify grounded answers, the abstention
   case, citations mapping to exact passages, and the eval — all reproducible locally.
 
-## 11. Open ideas / backlog
+## 12. Open ideas / backlog
 Agentic multi-hop retrieval for complex questions · streaming responses · a small "briefing doc"
 generator · managed-API fallbacks for YouTube/SPA ingestion (Supadata/Firecrawl) · per-source
 filtering (already supported in the API).
