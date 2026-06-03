@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { FaqItem, RetrievedChunk } from "./types";
 
-export type ArtifactType = "summary" | "faq" | "note";
+export type ArtifactType = "summary" | "faq" | "note" | "audio";
 
 /** A generated Studio output, persisted client-side so it survives reloads — the
  *  minimized-card-that-opens-in-a-viewer pattern from NotebookLM. */
@@ -16,6 +16,7 @@ export interface Artifact {
   summary?: string;
   faqs?: FaqItem[];
   note?: { question: string; answer: string };
+  script?: string;
   evidence?: RetrievedChunk[];
 }
 

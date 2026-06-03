@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { buildFaq, buildSummary } from "@/lib/api";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { buildAudio, buildFaq, buildSummary } from "@/lib/api";
 import type { Artifact, ArtifactType } from "@/lib/useArtifacts";
 import { CitationText, type CiteTarget } from "./CitationText";
 
-const ICON: Record<ArtifactType, string> = { summary: "📄", faq: "❓", note: "📌" };
+const ICON: Record<ArtifactType, string> = { summary: "📄", faq: "❓", note: "📌", audio: "🎧" };
+
+type GenType = "summary" | "faq" | "audio";
 
 export function StudioPanel({
   selectedIds,
@@ -29,7 +31,7 @@ export function StudioPanel({
   onRename: (id: string, title: string) => void;
 }) {
   const [openId, setOpenId] = useState<string | null>(null);
-  const [generating, setGenerating] = useState<"summary" | "faq" | null>(null);
+  const [generating, setGenerating] = useState<GenType | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [menuId, setMenuId] = useState<string | null>(null);
   const [renamingId, setRenamingId] = useState<string | null>(null);
@@ -37,7 +39,7 @@ export function StudioPanel({
 
   const open = artifacts.find((a) => a.id === openId) ?? null;
 
-  async function generate(type: "summary" | "faq") {
+  async function generate(type: GenType) {
     setGenerating(type);
     setError(null);
     try {
@@ -45,9 +47,13 @@ export function StudioPanel({
         const res = await buildSummary(selectedIds);
         const a = onAdd({ type, title: "Summary", sourceCount, summary: res.summary, evidence: res.evidence });
         setOpenId(a.id);
-      } else {
+      } else if (type === "faq") {
         const res = await buildFaq(selectedIds);
         const a = onAdd({ type, title: "Auto-FAQ", sourceCount, faqs: res.faqs, evidence: res.evidence });
+        setOpenId(a.id);
+      } else {
+        const res = await buildAudio(selectedIds);
+        const a = onAdd({ type, title: "Audio Overview", sourceCount, script: res.script });
         setOpenId(a.id);
       }
     } catch (e) {
@@ -118,6 +124,14 @@ export function StudioPanel({
             loading={generating === "faq"}
             disabled={!hasSources || !!generating}
             onClick={() => generate("faq")}
+          />
+          <GeneratorTile
+            icon="🎧"
+            label="Audio Overview"
+            hint="Spoken briefing"
+            loading={generating === "audio"}
+            disabled={!hasSources || !!generating}
+            onClick={() => generate("audio")}
           />
         </div>
 
@@ -274,6 +288,17 @@ function ArtifactBody({
     );
   }
 
+  if (artifact.type === "audio") {
+    return (
+      <div>
+        <AudioPlayer text={artifact.script ?? ""} />
+        <p className="mt-4 whitespace-pre-wrap text-sm leading-relaxed text-gray-600 dark:text-zinc-300">
+          {artifact.script}
+        </p>
+      </div>
+    );
+  }
+
   if (artifact.type === "faq") {
     return (
       <div className="space-y-4">
@@ -316,6 +341,76 @@ function ArtifactBody({
       >
         ↗ Ask again in chat
       </button>
+    </div>
+  );
+}
+
+/** Plays a script with the browser's free Web Speech API. Splits into sentences and
+ *  queues short utterances to avoid the Chrome long-text cutoff. */
+function AudioPlayer({ text }: { text: string }) {
+  const [state, setState] = useState<"idle" | "playing" | "paused">("idle");
+  const [supported, setSupported] = useState(true);
+  const sentences = useMemo(() => text.match(/[^.!?]+[.!?]*\s*/g)?.filter((s) => s.trim()) ?? [text], [text]);
+
+  useEffect(() => {
+    setSupported(typeof window !== "undefined" && "speechSynthesis" in window);
+    return () => window.speechSynthesis?.cancel();
+  }, []);
+
+  function play() {
+    const synth = window.speechSynthesis;
+    if (!synth) return;
+    if (state === "paused") {
+      synth.resume();
+      setState("playing");
+      return;
+    }
+    synth.cancel();
+    sentences.forEach((s, i) => {
+      const u = new SpeechSynthesisUtterance(s.trim());
+      u.rate = 1;
+      if (i === sentences.length - 1) u.onend = () => setState("idle");
+      synth.speak(u);
+    });
+    setState("playing");
+  }
+
+  if (!supported) {
+    return <p className="text-xs text-gray-400 dark:text-zinc-500">Audio playback isn&apos;t supported in this browser.</p>;
+  }
+
+  return (
+    <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-zinc-800 dark:bg-zinc-800/50">
+      <span className="text-xl">🎧</span>
+      {state !== "playing" ? (
+        <button
+          onClick={play}
+          className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700"
+        >
+          {state === "paused" ? "▶ Resume" : "▶ Play"}
+        </button>
+      ) : (
+        <button
+          onClick={() => {
+            window.speechSynthesis.pause();
+            setState("paused");
+          }}
+          className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-700"
+        >
+          ⏸ Pause
+        </button>
+      )}
+      <button
+        onClick={() => {
+          window.speechSynthesis.cancel();
+          setState("idle");
+        }}
+        disabled={state === "idle"}
+        className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-40 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-700"
+      >
+        ⏹ Stop
+      </button>
+      <span className="ml-auto text-xs text-gray-400 dark:text-zinc-500">free browser voice</span>
     </div>
   );
 }

@@ -95,3 +95,12 @@ export async function buildSummary(
   });
   return json<{ summary: string; evidence: RetrievedChunk[] }>(res);
 }
+
+export async function buildAudio(sourceIds: string[]): Promise<{ script: string }> {
+  const res = await fetch("/api/audio", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ sourceIds }),
+  });
+  return json<{ script: string }>(res);
+}

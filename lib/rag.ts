@@ -135,6 +135,24 @@ export async function generateSummary(
 }
 
 /**
+ * Generate a short, spoken-style overview script of the sources, for the (free, browser-based)
+ * Audio Overview. Plain prose, no citations/markdown — it's meant to be read aloud.
+ */
+export async function generateAudioScript(sourceIds?: string[]): Promise<{ script: string }> {
+  const evidence = await sampleChunks(20, sourceIds);
+  if (evidence.length === 0) return { script: "" };
+
+  const prompt = `SOURCES:\n${renderSources(evidence)}\n\nWrite a short, engaging spoken overview (about 150–200 words) of these sources, as if narrating a quick audio briefing for a busy listener. Use natural, conversational prose. No markdown, no bullet points, and no bracketed citation numbers. Stay strictly grounded in the sources, in the same language as the sources.`;
+  const schema = {
+    type: "OBJECT",
+    properties: { script: { type: "STRING" } },
+    required: ["script"],
+  };
+  const result = await generateJson<{ script: string }>(prompt, GROUNDING_RULES, schema);
+  return { script: (result.script ?? "").replace(/\[\d+\]/g, "").trim() };
+}
+
+/**
  * Proactively generate a grounded, cited FAQ from the corpus — the "help me work with
  * information, not just search it" feature. Every answer cites the chunks it came from.
  */
