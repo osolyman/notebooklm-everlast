@@ -103,7 +103,15 @@ export async function extractUrl(url: string): Promise<Extracted> {
   const $ = cheerio.load(html);
   $("script, style, noscript, nav, footer, header").remove();
   const text = tidy($("body").text());
-  if (text.length < 50) throw new Error("No readable text found at that URL.");
+  if (text.length < 50) {
+    const looksLikeSpa = /__NEXT_DATA__|_next\/static|id="root"|id="__next"|id="app"|enable JavaScript/i.test(html);
+    if (looksLikeSpa) {
+      throw new Error(
+        "This page builds its content with JavaScript, so there's no text to read from the server. Open the page, copy the text, and add it via 'Paste text instead' — or try a different URL.",
+      );
+    }
+    throw new Error("No readable text found at that URL. Try a different page, or paste the text directly.");
+  }
   const title = $("title").first().text().trim() || url;
   return { title, text };
 }

@@ -171,6 +171,18 @@ question, so Gate 1 stays conservative (no false refusals) and Gate 2 does the s
   rule so the chat no longer refuses summary/overview requests. → Video line: *"A summary isn't a
   top-k retrieval — it needs coverage of the whole doc. I separated those two paths."*
 
+- **Web ingestion has two hard cases — both infrastructure, not code.** Testing surfaced them:
+  (1) **YouTube** transcripts are blocked from datacenter IPs — works perfectly locally (residential
+  IP), refused on the Render host (verified 3/3). (2) **JavaScript-only SPAs** (e.g. Everlast's own
+  `career.kiberatung.de`, a Next.js app) return an empty `<body>` in the raw HTML — the content is
+  built by JS in the browser, which the server doesn't run (verified: 0 chars of body text).
+  Real products (and NotebookLM/Google) solve both with managed browsers + residential proxies
+  (Firecrawl, Supadata). I chose to keep the project free and dependency-light, handle the reliable
+  inputs excellently (PDF, pasted text, normal server-rendered article URLs), and **fail with a clear,
+  honest message** for the two hard cases rather than pretend. → Video line: *"I know exactly why
+  YouTube and JS-heavy pages fail on a free host — it's IP blocking and client-side rendering, not a
+  bug. I handled the inputs that matter and was honest about the rest, with a clear upgrade path."*
+
 ## 7. Video / interview talking points
 
 Open with the **thesis**, not a feature tour:
@@ -202,6 +214,40 @@ Open with the **thesis**, not a feature tour:
 - **"What breaks at scale?"** — In-memory store and single-process state; I'd move to a real vector
   DB, add streaming, request caching, and per-user isolation.
 
-## 9. Open ideas / backlog
-YouTube transcript ingestion · agentic multi-hop retrieval for complex questions · streaming
-responses · a small "briefing doc" generator · per-source filtering already supported in the API.
+## 9. Known limitations & how I'd productionize (say this in the interview)
+
+These are deliberate, understood trade-offs — not things I missed:
+
+| Limitation | Why | Production fix |
+|---|---|---|
+| YouTube fails on the deployed host | YouTube blocks transcript requests from datacenter IPs (works locally on a residential IP) | Managed transcript API (Supadata) or residential proxy |
+| JavaScript-only SPA pages can't be read | Content is rendered client-side; raw server HTML is an empty shell | Headless-browser rendering (Playwright) or a scraping API (Firecrawl) |
+| In-memory store resets on restart | No external DB; state lives in the process | Postgres + pgvector / a managed vector DB |
+| Free-tier model quota (20/day) | Gemini free tier | A paid key, or per-user keys |
+
+What works rock-solid everywhere: **PDF, pasted text, and normal server-rendered article URLs.**
+Demo strategy: lean on those; show YouTube locally; mention the rest as a known, costed upgrade path.
+
+## 10. Running it locally (for a live walkthrough with reviewers)
+
+Everything was developed and tested locally first; YouTube and any blocked sites work locally because
+requests come from a residential IP. To run a full live demo (e.g. screen-share in the next round):
+
+```bash
+git clone git@github.com:osolyman/notebooklm-everlast.git
+cd notebooklm-everlast
+echo "GEMINI_API_KEY=your_key_here" > .env.local   # free key: https://aistudio.google.com/apikey
+npm install
+npm run dev          # open http://localhost:3000
+```
+
+- Click **"Load a sample document"** to try instantly, or upload a PDF / paste text / add a URL.
+- **YouTube works locally** — paste a video URL with captions and ask about it.
+- Run the evaluation any time: `npm run eval` (prints the 20/20 grounding + abstention table).
+- How testing was done throughout: ingest via the API, then verify grounded answers, the abstention
+  case, citations mapping to exact passages, and the eval — all reproducible locally.
+
+## 11. Open ideas / backlog
+Agentic multi-hop retrieval for complex questions · streaming responses · a small "briefing doc"
+generator · managed-API fallbacks for YouTube/SPA ingestion (Supadata/Firecrawl) · per-source
+filtering (already supported in the API).
