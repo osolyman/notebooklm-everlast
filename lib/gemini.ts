@@ -59,17 +59,24 @@ type EmbedTask = "RETRIEVAL_DOCUMENT" | "RETRIEVAL_QUERY";
  * Embed a batch of texts. taskType lets Gemini optimize document vs. query embeddings,
  * which measurably improves retrieval relevance. Returns unit-normalized vectors.
  */
+/** Gemini's embedContent allows at most 100 inputs per request. */
+const EMBED_BATCH = 100;
+
 export async function embed(texts: string[], taskType: EmbedTask): Promise<number[][]> {
   if (texts.length === 0) return [];
-  const res = await withRetry(() =>
-    ai().models.embedContent({
-      model: EMBEDDING_MODEL,
-      contents: texts,
-      config: { outputDimensionality: EMBEDDING_DIM, taskType },
-    }),
-  );
-  const embeddings = res.embeddings ?? [];
-  return embeddings.map((e) => normalize(e.values ?? []));
+  const out: number[][] = [];
+  for (let i = 0; i < texts.length; i += EMBED_BATCH) {
+    const batch = texts.slice(i, i + EMBED_BATCH);
+    const res = await withRetry(() =>
+      ai().models.embedContent({
+        model: EMBEDDING_MODEL,
+        contents: batch,
+        config: { outputDimensionality: EMBEDDING_DIM, taskType },
+      }),
+    );
+    for (const e of res.embeddings ?? []) out.push(normalize(e.values ?? []));
+  }
+  return out;
 }
 
 export async function embedOne(text: string, taskType: EmbedTask): Promise<number[]> {
