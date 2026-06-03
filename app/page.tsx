@@ -2,11 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { listSources, seedSample, type SourceSummary } from "@/lib/api";
-import { useSaved } from "@/lib/useSaved";
+import { useArtifacts } from "@/lib/useArtifacts";
 import { GENERIC_QUESTIONS, SAMPLE_QUESTIONS, SAMPLE_TITLE } from "@/lib/sample";
 import { Sidebar } from "@/components/Sidebar";
 import { ChatPanel, type PendingAsk } from "@/components/ChatPanel";
-import { InsightsPanel } from "@/components/InsightsPanel";
+import { StudioPanel } from "@/components/StudioPanel";
 import { SourceViewer } from "@/components/SourceViewer";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import type { CiteTarget } from "@/components/CitationText";
@@ -16,7 +16,7 @@ export default function Home() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [viewer, setViewer] = useState<CiteTarget | null>(null);
   const [pendingAsk, setPendingAsk] = useState<PendingAsk | null>(null);
-  const { saved, save, remove, isSaved } = useSaved();
+  const { artifacts, add, remove, rename } = useArtifacts();
 
   const refresh = useCallback(async () => {
     const list = await listSources();
@@ -47,10 +47,16 @@ export default function Home() {
     });
 
   const askInChat = useCallback((q: string) => setPendingAsk({ q, nonce: Date.now() }), []);
-  const saveItem = useCallback((question: string, answer: string) => save({ question, answer }), [save]);
 
   const selectedIds = useMemo(() => [...selected], [selected]);
   const hasSources = selectedIds.length > 0;
+
+  // Saving a chat answer creates a "note" artifact in the Studio.
+  const saveItem = useCallback(
+    (question: string, answer: string) =>
+      add({ type: "note", title: question.slice(0, 60), sourceCount: selectedIds.length, note: { question, answer } }),
+    [add, selectedIds.length],
+  );
 
   // Show sample-specific starters only when the sample is the only thing selected;
   // otherwise show generic, document-agnostic prompts.
@@ -95,15 +101,16 @@ export default function Home() {
           />
         </section>
         <section className="hidden min-h-0 bg-white md:block dark:bg-zinc-900">
-          <InsightsPanel
+          <StudioPanel
             selectedIds={selectedIds}
             hasSources={hasSources}
+            sourceCount={selectedIds.length}
             onCite={setViewer}
             onAsk={askInChat}
-            onSave={saveItem}
-            isSaved={isSaved}
-            saved={saved}
-            onRemoveSaved={remove}
+            artifacts={artifacts}
+            onAdd={add}
+            onRemove={remove}
+            onRename={rename}
           />
         </section>
       </main>

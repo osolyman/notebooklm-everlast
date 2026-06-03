@@ -106,6 +106,9 @@ Stack: **Next.js 16 (App Router, TS) + Tailwind**, one app, deployed as a long-r
 - [x] **YouTube ingestion** — paste a YouTube URL → fetches the transcript (+ video title via
       oEmbed) and treats it as a source; the same Add field auto-detects YouTube vs web pages
 - [x] **Hardened web URL fetch** — browser-like headers + clear messages on 403/429 blocks
+- [x] **Studio with managed artifacts** — generated Summary/FAQ become persistent cards
+      (localStorage) that open in a viewer, collapse back, and support rename/delete; saved chat
+      answers become "note" artifacts (NotebookLM-style Studio pattern)
 - [x] **Evaluation harness** (`npm run eval`) — measures grounding + abstention accuracy
 - [x] **Deployed to a public URL** — https://notebooklm-everlast.onrender.com (Render free tier),
       verified live end-to-end (ingest → grounded answer with citations → abstention)
