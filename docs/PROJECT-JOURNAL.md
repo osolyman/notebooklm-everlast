@@ -109,6 +109,11 @@ Stack: **Next.js 16 (App Router, TS) + Tailwind**, one app, deployed as a long-r
 - [x] **Studio with managed artifacts** — generated Summary/FAQ become persistent cards
       (localStorage) that open in a viewer, collapse back, and support rename/delete; saved chat
       answers become "note" artifacts (NotebookLM-style Studio pattern)
+- [x] **Conversation memory + suggested follow-ups** — pronoun follow-ups resolve; 3 grounded
+      follow-up chips returned in the same call (zero extra quota)
+- [x] **Audio Overview** — grounded spoken-overview script played via the free browser Web Speech
+      API (mimics NotebookLM's signature feature at $0)
+- [x] **Modernized UI** — frosted header w/ gradient mark, fade-in animations, hover-lift cards
 - [x] **Evaluation harness** (`npm run eval`) — measures grounding + abstention accuracy
 - [x] **Deployed to a public URL** — https://notebooklm-everlast.onrender.com (Render free tier),
       verified live end-to-end (ingest → grounded answer with citations → abstention)
@@ -185,6 +190,25 @@ question, so Gate 1 stays conservative (no false refusals) and Gate 2 does the s
   honest message** for the two hard cases rather than pretend. → Video line: *"I know exactly why
   YouTube and JS-heavy pages fail on a free host — it's IP blocking and client-side rendering, not a
   bug. I handled the inputs that matter and was honest about the rest, with a clear upgrade path."*
+
+## 6b. What makes this submission different (say this with confidence)
+
+The median submission is "PDF upload + a chat box." Mine is differentiated not by feature count but
+by **engineering discipline and product judgment**:
+
+1. **It refuses to lie.** Two-gate abstention (a deterministic similarity floor + the model's own
+   evidence check) — most clones confidently hallucinate; mine says "I don't have that."
+2. **Every claim is verifiable.** Click any citation → the exact source passage is highlighted.
+3. **I measured it.** A real evaluation harness (20/20, 0 hallucinations) with gate-attribution —
+   almost no candidate treats LLM output as something to *measure*.
+4. **I documented every decision** with a POC→production roadmap and honest, understood limits.
+5. **Rigorous AND delightful** — on top of the trustworthy core: Studio artifacts, conversation
+   memory, suggested follow-ups, multilingual answers, and a free Audio Overview.
+6. **Owner mindset on cost** — built end-to-end at €0 (free tiers everywhere), with the exact paid
+   upgrade path for each layer.
+
+One line: *"I didn't just build a NotebookLM clone — I built a trustworthy one, proved it with an
+eval, and can tell you exactly how every piece goes to production."*
 
 ## 7. Video / interview talking points
 
