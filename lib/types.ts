@@ -48,6 +48,14 @@ export interface ChatResponse {
   evidence: RetrievedChunk[];
   /** Citation numbers the answer actually relied on. */
   citations: number[];
+  /** Up to 3 suggested follow-up questions, answerable from the sources. */
+  followUps: string[];
+}
+
+/** A prior turn passed back for conversational context. */
+export interface ChatTurn {
+  role: "user" | "assistant";
+  content: string;
 }
 
 export interface FaqItem {

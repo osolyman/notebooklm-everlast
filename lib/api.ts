@@ -1,4 +1,4 @@
-import type { ChatResponse, FaqItem, RetrievedChunk, Source } from "./types";
+import type { ChatResponse, ChatTurn, FaqItem, RetrievedChunk, Source } from "./types";
 
 export interface SourceSummary {
   id: string;
@@ -61,11 +61,15 @@ export async function getSource(id: string): Promise<Source> {
   return (await json<{ source: Source }>(await fetch(`/api/sources/${id}`))).source;
 }
 
-export async function ask(question: string, sourceIds: string[]): Promise<ChatResponse> {
+export async function ask(
+  question: string,
+  sourceIds: string[],
+  history: ChatTurn[] = [],
+): Promise<ChatResponse> {
   const res = await fetch("/api/chat", {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ question, sourceIds }),
+    body: JSON.stringify({ question, sourceIds, history }),
   });
   return json<ChatResponse>(res);
 }

@@ -52,13 +52,19 @@ export function ChatPanel({
   async function send(textArg?: string) {
     const q = (textArg ?? input).trim();
     if (!q || loading) return;
+    // Build conversational history from prior turns (before adding this one).
+    const history = messages.map((m) =>
+      m.role === "user"
+        ? { role: "user" as const, content: m.text }
+        : { role: "assistant" as const, content: m.data.answer },
+    );
     setInput("");
     setError(null);
     setMessages((m) => [...m, { role: "user", text: q }]);
     setLoading(true);
     scrollToBottom();
     try {
-      const data = await ask(q, selectedIds);
+      const data = await ask(q, selectedIds, history);
       setMessages((m) => [...m, { role: "assistant", data, question: q }]);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Chat failed.");
@@ -125,6 +131,7 @@ export function ChatPanel({
             />
           ),
         )}
+        {!loading && <FollowUps messages={messages} onPick={(q) => send(q)} />}
         {loading && (
           <div className="flex items-center gap-2 text-sm text-gray-400 dark:text-zinc-500">
             <Dot /> <Dot /> <Dot /> searching your sources…
@@ -303,6 +310,27 @@ function EmptyState({
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function FollowUps({ messages, onPick }: { messages: Msg[]; onPick: (q: string) => void }) {
+  const last = messages[messages.length - 1];
+  if (!last || last.role !== "assistant" || last.data.followUps.length === 0) return null;
+  return (
+    <div className="space-y-1.5">
+      <p className="text-xs font-medium text-gray-400 dark:text-zinc-500">Suggested follow-ups</p>
+      <div className="flex flex-col items-start gap-1.5">
+        {last.data.followUps.map((q, i) => (
+          <button
+            key={i}
+            onClick={() => onPick(q)}
+            className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-left text-xs text-gray-700 hover:border-indigo-300 hover:text-indigo-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-indigo-500/50 dark:hover:text-indigo-300"
+          >
+            {q}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

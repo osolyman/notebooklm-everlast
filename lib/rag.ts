@@ -1,7 +1,7 @@
 import { embedOne, generateJson } from "./gemini";
 import { search, sampleChunks } from "./store";
 import { SIMILARITY_FLOOR, TOP_K } from "./config";
-import type { ChatResponse, FaqItem, RetrievedChunk } from "./types";
+import type { ChatResponse, ChatTurn, FaqItem, RetrievedChunk } from "./types";
 
 const GROUNDING_RULES = `You are a careful research assistant for a NotebookLM-style app.
 You answer ONLY from the numbered SOURCES provided. Rules:
@@ -12,6 +12,8 @@ You answer ONLY from the numbered SOURCES provided. Rules:
 - If the sources do not contain enough information to answer a specific question, set
   "sufficient_evidence" to false and briefly say what is missing. Do NOT guess or fill gaps.
 - Always respond in the same language as the user's question.
+- When you answer, also propose up to 3 short, natural follow-up questions that ARE answerable from
+  the sources (in "follow_ups"), in the same language. If you cannot answer, leave "follow_ups" empty.
 - Be concise and factual.`;
 
 function renderSources(evidence: RetrievedChunk[]): string {
@@ -31,8 +33,14 @@ function renderSources(evidence: RetrievedChunk[]): string {
 export async function answerQuestion(
   question: string,
   sourceIds?: string[],
+  history: ChatTurn[] = [],
 ): Promise<ChatResponse> {
-  const queryEmbedding = await embedOne(question, "RETRIEVAL_QUERY");
+  // Memory-aware retrieval: prepend the previous user question so follow-ups like
+  // "and who founded it?" still retrieve the right context. Cheap (no extra LLM call).
+  const lastUser = [...history].reverse().find((t) => t.role === "user");
+  const retrievalQuery = lastUser ? `${lastUser.content}\n${question}` : question;
+
+  const queryEmbedding = await embedOne(retrievalQuery, "RETRIEVAL_QUERY");
   const evidence = await search(queryEmbedding, TOP_K, sourceIds);
 
   if (evidence.length === 0) {
@@ -41,6 +49,7 @@ export async function answerQuestion(
       answer: "There are no sources yet. Add a document, paste text, or add a URL to get started.",
       evidence: [],
       citations: [],
+      followUps: [],
     };
   }
 
@@ -52,24 +61,33 @@ export async function answerQuestion(
         "I can't find sufficient evidence in your sources to answer that. Here's the closest related material I found — you may want to rephrase, or add a source that covers this.",
       evidence: evidence.slice(0, 3),
       citations: [],
+      followUps: [],
     };
   }
 
-  const prompt = `SOURCES:\n${renderSources(evidence)}\n\nQUESTION: ${question}`;
+  const convo =
+    history.length > 0
+      ? `CONVERSATION SO FAR (for resolving references only; still answer ONLY from the sources):\n${history
+          .map((t) => `${t.role === "user" ? "User" : "Assistant"}: ${t.content}`)
+          .join("\n")}\n\n`
+      : "";
+  const prompt = `${convo}SOURCES:\n${renderSources(evidence)}\n\nQUESTION: ${question}`;
   const schema = {
     type: "OBJECT",
     properties: {
       sufficient_evidence: { type: "BOOLEAN" },
       answer: { type: "STRING" },
       used_chunks: { type: "ARRAY", items: { type: "INTEGER" } },
+      follow_ups: { type: "ARRAY", items: { type: "STRING" } },
     },
-    required: ["sufficient_evidence", "answer", "used_chunks"],
+    required: ["sufficient_evidence", "answer", "used_chunks", "follow_ups"],
   };
 
   const result = await generateJson<{
     sufficient_evidence: boolean;
     answer: string;
     used_chunks: number[];
+    follow_ups: string[];
   }>(prompt, GROUNDING_RULES, schema);
 
   // Gate 2: model's self-assessment.
@@ -81,6 +99,7 @@ export async function answerQuestion(
         "I can't find sufficient evidence in your sources to answer that confidently.",
       evidence: evidence.slice(0, 3),
       citations: [],
+      followUps: [],
     };
   }
 
@@ -90,6 +109,7 @@ export async function answerQuestion(
     answer: result.answer.trim(),
     evidence,
     citations: Array.from(new Set(valid)),
+    followUps: (result.follow_ups ?? []).slice(0, 3),
   };
 }
 
