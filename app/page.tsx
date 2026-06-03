@@ -68,12 +68,16 @@ export default function Home() {
 
   return (
     <div className="flex h-screen flex-col bg-gray-50 dark:bg-zinc-950">
-      <header className="flex items-center gap-2 border-b border-gray-200 bg-white px-5 py-3 dark:border-zinc-800 dark:bg-zinc-900">
-        <span className="text-lg">📓</span>
-        <h1 className="text-sm font-semibold text-gray-800 dark:text-zinc-100">Notebook</h1>
-        <span className="hidden rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500 sm:inline dark:bg-zinc-800 dark:text-zinc-400">
-          grounded · cited · honest about uncertainty
-        </span>
+      <header className="z-10 flex items-center gap-3 border-b border-gray-200/80 bg-white/70 px-5 py-2.5 backdrop-blur-md dark:border-zinc-800/80 dark:bg-zinc-900/70">
+        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 text-sm shadow-sm shadow-indigo-500/20">
+          📓
+        </div>
+        <div className="leading-tight">
+          <h1 className="text-sm font-semibold tracking-tight text-gray-800 dark:text-zinc-100">Notebook</h1>
+          <p className="hidden text-[11px] text-gray-400 sm:block dark:text-zinc-500">
+            grounded · cited · honest about uncertainty
+          </p>
+        </div>
         <div className="ml-auto">
           <ThemeToggle />
         </div>

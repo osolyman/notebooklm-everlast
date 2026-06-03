@@ -116,8 +116,8 @@ export function ChatPanel({
         )}
         {messages.map((m, i) =>
           m.role === "user" ? (
-            <div key={i} className="flex justify-end">
-              <div className="max-w-[85%] rounded-2xl rounded-br-sm bg-indigo-600 px-4 py-2 text-sm text-white">
+            <div key={i} className="flex justify-end animate-in">
+              <div className="max-w-[85%] rounded-2xl rounded-br-sm bg-indigo-600 px-4 py-2 text-sm text-white shadow-sm shadow-indigo-600/20">
                 {m.text}
               </div>
             </div>
@@ -159,7 +159,7 @@ export function ChatPanel({
           <button
             onClick={() => send()}
             disabled={!hasSources || loading || !input.trim()}
-            className="h-[42px] shrink-0 rounded-xl bg-indigo-600 px-4 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+            className="h-[42px] shrink-0 rounded-xl bg-indigo-600 px-4 text-sm font-medium text-white shadow-sm shadow-indigo-600/20 transition hover:bg-indigo-700 disabled:opacity-50 disabled:shadow-none"
           >
             Send
           </button>
@@ -182,7 +182,7 @@ function AssistantBubble({
 }) {
   const [saved, setSaved] = useState(false);
   return (
-    <div className="flex justify-start">
+    <div className="flex justify-start animate-in">
       <div className="max-w-[90%] space-y-3">
         <div
           className={`rounded-2xl rounded-bl-sm px-4 py-3 text-sm ${

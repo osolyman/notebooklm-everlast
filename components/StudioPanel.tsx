@@ -149,7 +149,7 @@ export function StudioPanel({
             {artifacts.map((a) => (
               <div
                 key={a.id}
-                className="relative flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900"
+                className="animate-in relative flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-3 transition hover:border-indigo-300 hover:shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-indigo-500/40"
               >
                 <button
                   onClick={() => setOpenId(a.id)}
@@ -227,7 +227,7 @@ function GeneratorTile({
     <button
       onClick={onClick}
       disabled={disabled}
-      className="flex flex-col gap-1 rounded-lg border border-gray-200 bg-white p-3 text-left transition hover:border-indigo-300 hover:bg-indigo-50 disabled:opacity-50 disabled:hover:border-gray-200 disabled:hover:bg-white dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-indigo-500/50 dark:hover:bg-indigo-500/10 dark:disabled:hover:bg-zinc-900"
+      className="flex flex-col gap-1 rounded-xl border border-gray-200 bg-white p-3 text-left transition duration-200 hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-50 hover:shadow-md disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:border-gray-200 disabled:hover:bg-white disabled:hover:shadow-none dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-indigo-500/50 dark:hover:bg-indigo-500/10 dark:disabled:hover:bg-zinc-900"
     >
       <span className="text-lg">{icon}</span>
       <span className="text-sm font-semibold text-gray-800 dark:text-zinc-100">
