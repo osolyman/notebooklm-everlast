@@ -103,6 +103,9 @@ Stack: **Next.js 16 (App Router, TS) + Tailwind**, one app, deployed as a long-r
       spread, not top-k, so "summarize this" works properly)
 - [x] **Adaptive starter questions** — sample-specific for the demo doc, generic for user uploads
 - [x] **Multilingual answers** — responds in the language of the question (tested with Arabic)
+- [x] **YouTube ingestion** — paste a YouTube URL → fetches the transcript (+ video title via
+      oEmbed) and treats it as a source; the same Add field auto-detects YouTube vs web pages
+- [x] **Hardened web URL fetch** — browser-like headers + clear messages on 403/429 blocks
 - [x] **Evaluation harness** (`npm run eval`) — measures grounding + abstention accuracy
 - [x] **Deployed to a public URL** — https://notebooklm-everlast.onrender.com (Render free tier),
       verified live end-to-end (ingest → grounded answer with citations → abstention)

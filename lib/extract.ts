@@ -2,6 +2,7 @@ import { extractText as extractPdfText, getDocumentProxy } from "unpdf";
 import { JSDOM } from "jsdom";
 import { Readability } from "@mozilla/readability";
 import * as cheerio from "cheerio";
+import { YoutubeTranscript } from "youtube-transcript";
 
 export interface Extracted {
   title: string;
@@ -10,6 +11,58 @@ export interface Extracted {
 
 function tidy(text: string): string {
   return text.replace(/[ \t]+/g, " ").replace(/\n{3,}/g, "\n\n").trim();
+}
+
+export function isYouTubeUrl(url: string): boolean {
+  return /(?:youtube\.com\/(?:watch|shorts|embed|live)|youtu\.be\/)/i.test(url);
+}
+
+/**
+ * Fetch a YouTube video's transcript and treat it as the source text — so the assistant
+ * can answer about the video exactly as it does for a PDF. The video title is fetched via
+ * the lightweight oEmbed endpoint. Note: YouTube often rate-limits transcript requests from
+ * datacenter IPs, so this can fail on cloud hosts even when it works locally.
+ */
+export async function extractYouTube(url: string): Promise<Extracted> {
+  let segments: { text: string }[];
+  try {
+    segments = await YoutubeTranscript.fetchTranscript(url);
+  } catch {
+    throw new Error(
+      "Couldn't get a transcript for this video. It may have captions disabled, or YouTube is rate-limiting requests from the server. Try another video, or paste the transcript as text.",
+    );
+  }
+
+  const text = tidy(
+    segments
+      .map((s) => decodeHtml(s.text))
+      .join(" "),
+  );
+  if (text.length < 50) throw new Error("This video has no usable transcript text.");
+
+  let title = "YouTube video";
+  try {
+    const res = await fetch(
+      `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`,
+    );
+    if (res.ok) {
+      const data = (await res.json()) as { title?: string };
+      if (data.title) title = data.title;
+    }
+  } catch {
+    /* title is best-effort */
+  }
+  return { title, text };
+}
+
+/** Transcript fragments arrive HTML-escaped (e.g. &amp;#39;). Decode the common entities. */
+function decodeHtml(s: string): string {
+  return s
+    .replace(/&amp;#39;|&#39;/g, "'")
+    .replace(/&amp;quot;|&quot;/g, '"')
+    .replace(/&amp;amp;|&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">");
 }
 
 export async function extractPdf(buffer: ArrayBuffer, filename: string): Promise<Extracted> {
@@ -24,9 +77,20 @@ export async function extractPdf(buffer: ArrayBuffer, filename: string): Promise
  */
 export async function extractUrl(url: string): Promise<Extracted> {
   const res = await fetch(url, {
-    headers: { "User-Agent": "Mozilla/5.0 (compatible; NotebookLM-clone/1.0)" },
+    headers: {
+      "User-Agent":
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+      Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      "Accept-Language": "en-US,en;q=0.9",
+    },
   });
-  if (!res.ok) throw new Error(`Could not fetch URL (HTTP ${res.status}).`);
+  if (!res.ok) {
+    const hint =
+      res.status === 429 || res.status === 403
+        ? " The site is blocking automated requests — try a different URL or paste the text directly."
+        : "";
+    throw new Error(`Could not fetch URL (HTTP ${res.status}).${hint}`);
+  }
   const html = await res.text();
 
   const dom = new JSDOM(html, { url });

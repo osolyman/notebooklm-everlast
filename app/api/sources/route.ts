@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { extractPdf, extractRawText, extractUrl } from "@/lib/extract";
+import { extractPdf, extractRawText, extractUrl, extractYouTube, isYouTubeUrl } from "@/lib/extract";
 import { ingest } from "@/lib/ingest";
 import { clearAll, deleteSource, getSources } from "@/lib/store";
 
@@ -39,6 +39,11 @@ export async function POST(req: NextRequest) {
     if (body.type === "url") {
       const url = String(body.url ?? "").trim();
       if (!url) return NextResponse.json({ error: "Missing URL." }, { status: 400 });
+      if (isYouTubeUrl(url)) {
+        const extracted = await extractYouTube(url);
+        const { source, chunkCount } = await ingest(extracted, "youtube", url);
+        return NextResponse.json({ source: summarize(source), chunkCount });
+      }
       const extracted = await extractUrl(url);
       const { source, chunkCount } = await ingest(extracted, "url", url);
       return NextResponse.json({ source: summarize(source), chunkCount });

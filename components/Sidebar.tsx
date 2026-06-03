@@ -99,7 +99,7 @@ export function Sidebar({
           <input
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder="Paste a web URL"
+            placeholder="Web or YouTube URL"
             className={inputCls}
           />
           <button
