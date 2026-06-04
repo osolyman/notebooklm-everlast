@@ -181,6 +181,20 @@ function AssistantBubble({
   onSave: (q: string, a: string) => void;
 }) {
   const [saved, setSaved] = useState(false);
+
+  // Ensure an inline clickable citation even if the model omitted the [n] marker.
+  const answerText =
+    data.answered && data.citations.length && !/\[\d+\]/.test(data.answer)
+      ? `${data.answer} ${data.citations.map((c) => `[${c}]`).join("")}`
+      : data.answer;
+
+  // Show only the source(s) the answer actually relied on — not every retrieved chunk.
+  const shownEvidence = data.answered
+    ? data.citations.length
+      ? data.evidence.filter((e) => data.citations.includes(e.n))
+      : data.evidence.slice(0, 1)
+    : data.evidence;
+
   return (
     <div className="flex justify-start animate-in">
       <div className="max-w-[90%] space-y-3">
@@ -196,16 +210,20 @@ function AssistantBubble({
               ⚠ Not enough evidence
             </div>
           )}
-          <CitationText text={data.answer} evidence={data.evidence} onCite={onCite} />
+          <CitationText text={answerText} evidence={data.evidence} onCite={onCite} />
         </div>
 
-        {data.evidence.length > 0 && (
+        {shownEvidence.length > 0 && (
           <div className="space-y-1">
             <p className="text-xs font-medium text-gray-400 dark:text-zinc-500">
-              {data.answered ? "Evidence" : "Closest related material"}
+              {data.answered
+                ? shownEvidence.length > 1
+                  ? "Sources"
+                  : "Source"
+                : "Closest related material"}
             </p>
             <div className="flex flex-wrap gap-1.5">
-              {data.evidence.map((e) => (
+              {shownEvidence.map((e) => (
                 <button
                   key={e.chunkId}
                   onClick={() =>

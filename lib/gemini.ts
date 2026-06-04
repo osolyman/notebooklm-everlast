@@ -36,7 +36,11 @@ async function withRetry<T>(fn: () => Promise<T>, attempts = 4): Promise<T> {
           "Daily API quota reached on the free tier. Please wait until midnight Pacific Time (when quotas reset) and try again. This is a free-tier limit of the Gemini API, not an app bug.",
         );
       }
-      if (i === attempts - 1) throw err;
+      if (i === attempts - 1) {
+        throw new Error(
+          "The free-tier API quota is exhausted right now (rate or daily limit). Please wait a bit and try again, or use a fresh API key — this is a Gemini free-tier limit, not an app error.",
+        );
+      }
       const suggested = msg.match(/retry(?:Delay)?["\s:]*?([\d.]+)\s*s/i);
       const waitMs = suggested ? Math.ceil(parseFloat(suggested[1]) * 1000) + 500 : (i + 1) * 15000;
       await sleep(waitMs);
