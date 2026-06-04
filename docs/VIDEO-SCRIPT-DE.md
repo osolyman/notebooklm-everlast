@@ -1,7 +1,8 @@
 # Loom-Skript (Deutsch) — NotebookLM-Klon für Everlast AI
 
-Ziel: 5–7 Minuten, **entscheidungsorientiert** (nicht nur Feature-Liste). Mit der wichtigsten
-Eigenschaft zuerst: das System verweigert eine Antwort, wenn die Belege fehlen.
+Ziel: 6–8 Minuten, **entscheidungsorientiert** (nicht nur Feature-Liste). Mit der wichtigsten
+Eigenschaft zuerst: das System verweigert eine Antwort, wenn die Belege fehlen. *Wenn es zu lang
+wird: Szene 5 (Quellen-Vielfalt) kürzen oder weglassen.*
 
 **Vor der Aufnahme:** lokal starten (`npm run dev` → http://localhost:3000), Beispiel-Dokument laden,
 Browser aufräumen (keine Lesezeichenleiste), Zoom ~110%. Eval-Ergebnis vorher einmal laufen lassen
@@ -36,6 +37,11 @@ hat eine Quellenangabe. Und wenn ich auf so eine Quellenangabe klicke …“
 *[AKTION: auf die Zahl [1] klicken → Quelle öffnet sich, Stelle ist markiert]*
 „… öffnet sich die Quelle und genau die Textstelle wird markiert. Das heißt: jede Antwort ist in
 einem Klick überprüfbar.“
+
+*[Mehrsprachigkeit-Nebenbemerkung — passt hier gut, weil du auf Deutsch über ein englisches Dokument
+sprichst]*
+„Kleiner Nebeneffekt, den ihr gerade seht: Das Dokument ist auf Englisch, ich frage auf Deutsch — und
+bekomme die Antwort auf Deutsch. Das System antwortet immer in der Sprache der Frage.“
 
 ### Szene 2 — Das Wichtigste: Verweigern statt Erfinden (~45 Sek.)
 *[AKTION: Frage stellen, die NICHT in der Quelle steht, z. B. „Wie hoch ist der Umsatz des Unternehmens?“]*
@@ -81,6 +87,14 @@ hoch ist der Umsatz?‘ sieht thematisch passend aus. Deshalb habe ich **zwei St
 deterministische Schwelle UND die Selbsteinschätzung des Modells. Keine der beiden allein erreicht
 100 %.“
 
+*[Testen & Härten — zeigt Produktreife-Denken]*
+„Und ich habe nicht einfach gebaut und gehofft, dass es klappt — ich habe mit **echten** PDFs und
+Videos getestet und dabei drei reale Probleme gefunden und behoben: zu grobe Quellen-Abschnitte, ein
+stilles Hängen beim Erreichen des Tages-Limits, und ein Limit beim Einbetten sehr langer Transkripte.
+Außerdem habe ich den API-Client robust gemacht: kurzzeitige Limits wiederholt er automatisch, das
+Tages-Limit meldet er klar statt einfach hängen zu bleiben. Genau dieses Testen mit echten Daten war
+ein großer Teil meiner Arbeit.“
+
 ### Szene 7 — Bewusste Entscheidungen & Weg zur Produktreife (~45 Sek.)
 
 „Ein paar **bewusste** Entscheidungen: Ich habe auf bezahlte Audio-Stimmen, Login und eine externe
@@ -88,6 +102,12 @@ Datenbank verzichtet — nicht, weil ich den Weg nicht kenne, sondern um in kurz
 Kosten** die Idee zu beweisen. Alles läuft auf kostenlosen Tiers. Für jede Vereinfachung habe ich den
 Produktiv-Weg dokumentiert: echte Vektor-Datenbank, bezahltes Modell-Kontingent, Mehrbenutzer. Erst
 Vertrauen schaffen, dann skalieren und ausbauen.“
+
+*[Ehrliche Grenzen — signalisiert Reife]*
+„Und ich bin ehrlich bei den Grenzen: YouTube und reine JavaScript-Seiten lassen sich von einem
+kostenlosen Server aus nicht zuverlässig laden — das liegt an IP-Sperren und an Client-seitigem
+Rendering, nicht an einem Fehler im Code. Lokal funktioniert YouTube einwandfrei; in Produktion löst
+man das mit spezialisierten Diensten. PDFs, Text und normale Webseiten laufen überall zuverlässig.“
 
 ### Szene 8 — Abschluss (~20 Sek.)
 
