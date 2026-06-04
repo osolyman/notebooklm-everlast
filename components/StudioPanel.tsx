@@ -102,7 +102,9 @@ export function StudioPanel({
       <div className="border-b border-gray-200 px-5 py-3 dark:border-zinc-800">
         <h2 className="text-sm font-semibold text-gray-700 dark:text-zinc-200">Studio</h2>
         <p className="mt-0.5 text-xs text-gray-400 dark:text-zinc-500">
-          Generate grounded artifacts from your sources.
+          {hasSources
+            ? `Generates from ${sourceCount} selected source${sourceCount === 1 ? "" : "s"}.`
+            : "Select at least one source to generate."}
         </p>
       </div>
 

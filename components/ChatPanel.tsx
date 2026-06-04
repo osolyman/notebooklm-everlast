@@ -141,6 +141,14 @@ export function ChatPanel({
       </div>
 
       <div className="border-t border-gray-200 p-3 dark:border-zinc-800">
+        <div className="mb-1.5 flex items-center gap-1.5 px-0.5 text-xs text-gray-400 dark:text-zinc-500">
+          <span>📄</span>
+          <span>
+            {hasSources
+              ? `Answering from ${selectedIds.length} source${selectedIds.length === 1 ? "" : "s"}`
+              : "No sources selected — pick at least one on the left"}
+          </span>
+        </div>
         <div className="flex items-end gap-2">
           <textarea
             value={input}
