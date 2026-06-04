@@ -5,7 +5,7 @@
 > updated continuously as the project progresses, so it is always current. This is my prep document —
 > by the end I want to be able to defend every decision with confidence.
 
-_Last updated: 2026-06-02_
+_Last updated: 2026-06-04_
 
 ---
 
@@ -51,7 +51,7 @@ Every decision has both a **business** reason and a **technical** reason.
 | **Abstain when evidence is weak** (handle uncertainty) | A system that says "I don't know" is safe to deploy; a confident liar isn't | Shows I understand LLM limits; enforced as an explicit gate, not left to chance |
 | **Two independent abstention gates** (server similarity floor + model self-check) | Reliability the business can count on | Defense in depth — grounding never depends on the model's goodwill alone |
 | **In-memory vector store** (no managed DB) | Faster to ship; no infra cost | At this scale brute-force cosine is instant *and* fully explainable on camera |
-| **Cut Audio Overview / TTS** | Flashy but doesn't reduce workload | Mostly an API call; low engineering signal; classic time-sink |
+| **Audio Overview via free browser TTS** | NotebookLM's signature feature, delivered at €0 | Web Speech API runs client-side; paid multi-voice "podcast" is the prod upgrade |
 | **Cut auth / multi-user / multiple notebooks** | Not needed to prove the value | Pure infrastructure the reviewer never sees |
 | **Gemini free tier** (`flash-lite` + `gemini-embedding-001`) | Zero cost, no credit card | On-brand (real NotebookLM runs on Gemini); generous free quota |
 | **`gemini-2.5-flash-lite` over `gemini-2.5-flash`** | Demo must survive multiple reviewers | flash's free daily quota capped at 20/day on this key; flash-lite's bucket is far larger |
@@ -60,9 +60,11 @@ Every decision has both a **business** reason and a **technical** reason.
 | **Tiny evaluation harness** | Proves the system works, not just "trust me" | Treating LLM output as something to *measure* is the core of production AI |
 
 ### What I deliberately did NOT build (and will say so)
-Audio overview, authentication, sharing/collaboration, mobile, multiple notebooks, a managed vector
-database, YouTube ingestion (kept as an optional nice-to-have). Each was a conscious cut to keep the
-core rock-solid. **Naming the cuts is itself a signal of judgment.**
+Authentication, sharing/collaboration, mobile layout, multiple notebooks, a managed vector database,
+response streaming, and agentic multi-hop retrieval. Each was a conscious cut to keep the core
+rock-solid and the cost at zero. **Naming the cuts is itself a signal of judgment.**
+*(Audio Overview and YouTube ingestion were initially cut, then added later — Audio for free via the
+browser, YouTube because it was quick and high-value; see §5/§6.)*
 
 ## 4. Architecture (one glance)
 
@@ -91,7 +93,7 @@ Stack: **Next.js 16 (App Router, TS) + Tailwind**, one app, deployed as a long-r
 - [x] **Evidence panel** — shows retrieved chunks with similarity % (makes grounding visible even on success)
 - [x] **Two-gate abstention** — server similarity floor + model self-assessment
 - [x] **Proactive auto-FAQ** — grounded, cited Q&A generated from the sources ("work with info, not just search")
-- [x] **3-pane UI** — Sources | Chat | Insights, NotebookLM-style
+- [x] **3-pane UI** — Sources | Chat | Studio, NotebookLM-style
 - [x] **429 retry with backoff** in the Gemini client
 - [x] **One-click sample document + starter questions** — reviewers can try it instantly; one
       starter question deliberately triggers abstention, so the differentiator is impossible to miss
@@ -117,7 +119,7 @@ Stack: **Next.js 16 (App Router, TS) + Tailwind**, one app, deployed as a long-r
 - [x] **Evaluation harness** (`npm run eval`) — measures grounding + abstention accuracy
 - [x] **Deployed to a public URL** — https://notebooklm-everlast.onrender.com (Render free tier),
       verified live end-to-end (ingest → grounded answer with citations → abstention)
-- [ ] _Optional / if time:_ YouTube ingestion, agentic multi-hop retrieval, streaming responses
+- [ ] _Not built (deliberate / backlog):_ agentic multi-hop retrieval, response streaming, multi-user
 
 ## 6. Things I discovered through testing (great video material)
 
@@ -191,6 +193,16 @@ question, so Gate 1 stays conservative (no false refusals) and Gate 2 does the s
   YouTube and JS-heavy pages fail on a free host — it's IP blocking and client-side rendering, not a
   bug. I handled the inputs that matter and was honest about the rest, with a clear upgrade path."*
 
+- **Embedding has a 100-input batch limit.** A long YouTube transcript produced >100 chunks; sending
+  them in one `embedContent` call failed with a 400. Fix: embed in batches of 100 and stitch. → Video
+  note (optional): *"Long transcripts exceeded Gemini's 100-item embedding batch — I found it by
+  ingesting a full video and batched the calls."* A small but real "I test with real data" signal.
+
+- **Three real bugs surfaced by my own testing, all fixed:** coarse-chunk citations, a silent
+  ~4-minute hang on daily-quota exhaustion (now fails fast), and the 100-item embedding batch limit.
+  → Video line: *"I didn't just build it and hope — I stress-tested it with real PDFs and videos and
+  hardened the rough edges."*
+
 ## 6b. What makes this submission different (say this with confidence)
 
 The median submission is "PDF upload + a chat box." Mine is differentiated not by feature count but
@@ -230,8 +242,9 @@ Open with the **thesis**, not a feature tour:
 
 ## 8. Anticipated reviewer questions (and my answers)
 
-- **"Why no audio overview?"** — Highest wow, lowest engineering signal (mostly a TTS call). I chose
-  to make the core trustworthy instead; I'd add it once the core earns it.
+- **"How did you do the audio overview for free?"** — The model writes a grounded spoken script; the
+  browser's Web Speech API reads it aloud client-side at zero cost. The production upgrade is a paid
+  multi-voice "podcast" TTS — but the concept is proven for free.
 - **"Why an in-memory store and not pgvector/Pinecone?"** — At this scale it's identical in quality,
   instant, and fully explainable. I noted the exact upgrade path for scale.
 - **"How do you stop hallucination?"** — Two gates: a deterministic similarity floor before the model
@@ -274,7 +287,7 @@ production-grade once it's trusted and funded.*
 | Auth & multi-tenant | None | Out of scope to prove the idea | Accounts, per-user workspaces, sharing, role-based access |
 | Web / YouTube ingest | Direct fetch + scrape | Free; works for the common cases | Managed scraping + transcript APIs (Firecrawl / Supadata) + residential proxies |
 | Persistence | Ephemeral (resets on restart) | Fine for a single-session demo | Durable storage + backups + migrations |
-| Chat | Single-shot, non-streaming | Simpler, reliable to build | Streaming responses, conversation memory, agentic multi-hop retrieval |
+| Chat | Single-shot (with conversation memory + follow-ups) | Simpler, reliable to build | Streaming responses, agentic multi-hop retrieval |
 | Evaluation | 20-question harness | Enough to prove grounding/abstention | Continuous eval suite, regression gates, online quality monitoring |
 | Observability & security | Minimal | Not needed to validate the concept | Logging/tracing, cost monitoring, tenant isolation, PII handling, compliance |
 
