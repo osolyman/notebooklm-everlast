@@ -13,14 +13,20 @@ und das Terminal-Fenster offen lassen (nicht live im Video laufen lassen — spa
 
 ---
 
-### Szene 0 — Einstieg (~20 Sek.)
+### Szene 0 — Einstieg (~35 Sek.)
 *[AKTION: App offen, Startbildschirm]*
 
-„Hi, ich bin Omar. Als Aufgabe habe ich einen NotebookLM-Klon gebaut. Bevor ich euch das Ergebnis
-zeige, kurz mein Leitgedanke: Der eigentliche Wert von NotebookLM ist nicht der Datei-Upload oder der
-Chat — das kann jeder. Der Kern ist **Vertrauen**: Antworten kommen ausschließlich aus euren Quellen,
-sind belegt, und das System ist ehrlich, wenn es etwas nicht weiß. Genau da habe ich meine Zeit
-investiert.“
+„Hi, ich bin Omar. Für diese Aufgabe habe ich einen NotebookLM-Klon als **Proof-of-Concept** gebaut.
+Entwickelt habe ich das System mit **Claude** als KI-Tool. Mein eigener Fokus lag dabei weniger auf
+dem reinen Tippen von Code, sondern darauf, das Produkt wirklich zum Laufen zu bringen: viel **selbst
+zu testen**, Schwachstellen und sinnvolle **Verbesserungen** zu finden, und bewusst zu
+**recherchieren**, welche Technologie für welchen Teil am besten passt — sowohl für den POC als auch
+später für die Produktion — und vor allem *warum*.
+
+Bevor ich euch das Ergebnis zeige, kurz mein Leitgedanke: Der eigentliche Wert von NotebookLM ist
+nicht der Datei-Upload oder der Chat — das kann jeder. Der Kern ist **Vertrauen**: Antworten kommen
+ausschließlich aus euren Quellen, sind belegt, und das System ist ehrlich, wenn es etwas nicht weiß.
+Genau da habe ich meine Zeit investiert.“
 
 ### Szene 1 — Belegte Antwort (~60 Sek.)
 *[AKTION: Frage stellen, z. B. „Wie viele Urlaubstage bekommen Mitarbeiter?“]*
