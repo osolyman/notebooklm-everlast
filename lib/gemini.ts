@@ -1,52 +1,72 @@
 import { GoogleGenAI } from "@google/genai";
 import { EMBEDDING_MODEL, EMBEDDING_DIM, GENERATION_MODEL } from "./config";
 
-let client: GoogleGenAI | null = null;
+// One or more API keys (comma-separated in GEMINI_API_KEY). Each Google account has its
+// own free-tier quota, so rotating across keys multiplies the effective daily limit and
+// keeps the demo alive when one key is exhausted.
+function keys(): string[] {
+  return (process.env.GEMINI_API_KEY ?? "")
+    .split(",")
+    .map((k) => k.trim())
+    .filter(Boolean);
+}
+
+let keyIndex = 0;
+const clients = new Map<string, GoogleGenAI>();
 
 function ai(): GoogleGenAI {
-  if (!process.env.GEMINI_API_KEY) {
+  const ks = keys();
+  if (ks.length === 0) {
     throw new Error(
-      "GEMINI_API_KEY is not set. Create a free key at https://aistudio.google.com/apikey and add it to .env.local",
+      "GEMINI_API_KEY is not set. Create a free key at https://aistudio.google.com/apikey and add it to .env.local (you can add several, comma-separated).",
     );
   }
-  if (!client) client = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-  return client;
+  const key = ks[keyIndex % ks.length];
+  let c = clients.get(key);
+  if (!c) {
+    c = new GoogleGenAI({ apiKey: key });
+    clients.set(key, c);
+  }
+  return c;
 }
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /**
- * Retry on transient per-minute rate-limit (429) errors. Fails fast on daily quota
- * exhaustion (PerDay) since retrying won't help until midnight. This keeps the deployed
- * app resilient when a reviewer clicks around quickly, without hanging for minutes.
+ * Run a call with quota resilience:
+ *  - On a 429, immediately rotate to the next key (each key has its own quota).
+ *  - If every key is out for the *day*, fail fast with a clear message.
+ *  - If it's a transient per-minute limit on all keys, wait once and retry the cycle.
  */
-async function withRetry<T>(fn: () => Promise<T>, attempts = 4): Promise<T> {
-  let lastErr: unknown;
-  for (let i = 0; i < attempts; i++) {
-    try {
-      return await fn();
-    } catch (err) {
-      lastErr = err;
-      const msg = err instanceof Error ? err.message : String(err);
-      const is429 = /429|RESOURCE_EXHAUSTED|rate limit|quota/i.test(msg);
-      if (!is429) throw err;
-      // Daily quota exhaustion cannot be retried — fail fast with a clear message.
-      if (/PerDay|per_day|daily/i.test(msg)) {
-        throw new Error(
-          "Daily API quota reached on the free tier. Please wait until midnight Pacific Time (when quotas reset) and try again. This is a free-tier limit of the Gemini API, not an app bug.",
-        );
+async function withRetry<T>(fn: () => Promise<T>): Promise<T> {
+  const ks = keys();
+  let dailyOnAll = false;
+
+  for (let cycle = 0; cycle < 2; cycle++) {
+    let allDaily = true;
+    for (let k = 0; k < Math.max(ks.length, 1); k++) {
+      try {
+        return await fn();
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        if (!/429|RESOURCE_EXHAUSTED|rate limit|quota/i.test(msg)) throw err;
+        if (!/PerDay|per_day|daily/i.test(msg)) allDaily = false;
+        keyIndex++; // rotate to the next key for the next attempt
       }
-      if (i === attempts - 1) {
-        throw new Error(
-          "The free-tier API quota is exhausted right now (rate or daily limit). Please wait a bit and try again, or use a fresh API key — this is a Gemini free-tier limit, not an app error.",
-        );
-      }
-      const suggested = msg.match(/retry(?:Delay)?["\s:]*?([\d.]+)\s*s/i);
-      const waitMs = suggested ? Math.ceil(parseFloat(suggested[1]) * 1000) + 500 : (i + 1) * 15000;
-      await sleep(waitMs);
     }
+    dailyOnAll = allDaily;
+    if (dailyOnAll) break; // every key is out for today — waiting won't help
+    await sleep(20000); // transient limit on all keys — wait once, then retry the cycle
   }
-  throw lastErr;
+
+  if (dailyOnAll) {
+    throw new Error(
+      "Daily API quota reached on all configured keys. Add another key (comma-separated in GEMINI_API_KEY) or wait until midnight Pacific Time, when the free tier resets.",
+    );
+  }
+  throw new Error(
+    "The free-tier API quota is exhausted right now (rate limit) on all keys. Please wait a minute and try again.",
+  );
 }
 
 /** L2-normalize so cosine similarity reduces to a dot product. */

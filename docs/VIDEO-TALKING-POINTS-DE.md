@@ -45,8 +45,8 @@ krieg die Antwort auf Deutsch zurück. Das System antwortet immer in der Sprache
 Quellen steht … Und ihr seht: das System rät nicht und erfindet auch nichts. Es sagt ganz klar, dass
 es dafür keine ausreichenden Belege hat, und zeigt mir nur, was es Ähnliches gefunden hat.
 
-Die meisten Klone würden hier selbstbewusst irgendwas halluzinieren — meiner nicht. Und dieses
-ehrliche ‚Ich weiß es nicht' ist für ein Firmen-Tool eigentlich die wichtigste Eigenschaft. Denn ein
+Die meisten Klone würden hier selbstbewusst irgendwas halluzinieren. Und dieses
+ehrliche ‚Ich weiß es nicht' ist für ein Firmen-Tool eigentlich einer der wichtigsten Eigenschaften. Denn ein
 System, das überzeugend falsche Antworten gibt, ist schlimmer als nutzlos."
 
 ### Szene 3 — Studio (~60 Sek)
@@ -83,20 +83,12 @@ sind. Das Ergebnis: zwanzig von zwanzig richtig, null Halluzinationen.
 Und beim Testen hab ich was Spannendes gemerkt: Ähnlichkeit allein reicht nicht. So eine Frage wie
 ‚Wie hoch ist der Umsatz?' sieht thematisch total passend aus, ist aber gar nicht beantwortbar. Genau
 deshalb hab ich zwei Stufen eingebaut — einmal eine feste Schwelle, und einmal die Selbsteinschätzung
-des Modells. Keine von beiden allein schafft die hundert Prozent.
-
-Und generell: ich hab nicht einfach gebaut und gehofft, dass es klappt. Ich hab mit echten PDFs und
-Videos getestet, drei reale Probleme gefunden und behoben, und den Client robust gemacht, falls man
-mal ans API-Limit kommt."
+des Modells. Keine von beiden allein schafft die hundert Prozent."
 
 ### Szene 7 — Bewusste Entscheidungen & Produktion (~45 Sek)
 
 „Ein paar Sachen hab ich ganz bewusst weggelassen — zum Beispiel bezahlte, hochwertige Stimmen, einen
-Login oder eine externe Datenbank. Nicht, weil ich den Weg nicht kenne, sondern um in kurzer Zeit und
-zu null Kosten erstmal die Idee zu beweisen. Alles läuft auf kostenlosen Tiers. Und für jede dieser
-Vereinfachungen hab ich den Weg in die Produktion dokumentiert — also echte Vektor-Datenbank,
-bezahltes Kontingent, Mehrbenutzer und so weiter. Mein Prinzip war: erst Vertrauen schaffen, dann
-skalieren.
+Login oder eine externe Datenbank, um in kurzer Zeit und zu null Kosten erstmal die Idee zu beweisen. Alles läuft auf kostenlosen Tiers. Und für jede dieser Vereinfachungen hab ich den Weg in die Produktion dokumentiert — also echte Vektor-Datenbank, bezahltes Kontingent, Mehrbenutzer und so weiter. Mein Prinzip war: erst Vertrauen schaffen, dann skalieren.
 
 Und ich bin auch ehrlich bei den Grenzen: YouTube und reine JavaScript-Seiten lassen sich von so
 einem kostenlosen Server aus nicht zuverlässig laden — das liegt an IP-Sperren und am Rendering im
