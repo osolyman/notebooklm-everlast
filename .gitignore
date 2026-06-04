@@ -43,3 +43,8 @@ next-env.d.ts
 # Local data store + secrets
 /data
 .env.local
+
+# Internal docs — not for reviewers
+docs/
+AGENTS.md
+CLAUDE.md
