@@ -27,15 +27,17 @@ NotebookLM's real differentiator isn't file upload or a chat box — those are c
 system is honest when it doesn't know. That is exactly the hard part of applied RAG, and it's where I
 invested.
 
-So I built the core to be bulletproof and **deliberately cut** the flashier things that don't prove
-more engineering skill:
+So I built the core to be bulletproof, then layered on the features that add real value — and
+**deliberately cut** the things that don't prove engineering judgment:
 
 | Invested in | Deliberately cut |
 |---|---|
-| Grounded answers with **verifiable, click-to-source citations** | Audio Overview / TTS (mostly an API call; the classic time-sink) |
-| **Correct handling of uncertainty** — abstains instead of hallucinating | Auth, multi-user, sharing |
-| Multi-format ingestion (PDF, web URL, pasted text) | Managed vector DB infra (unnecessary at this scale) |
-| One proactive, **cited** insight (auto-FAQ) | Mobile, multiple notebooks, 50-source scale |
+| Grounded answers with **verifiable, click-to-source citations** | Auth, multi-user, sharing |
+| **Two-gate abstention** — refuses instead of hallucinating | Managed vector DB (unnecessary at this scale) |
+| Multi-format ingestion (PDF, web URL, YouTube, pasted text) | Mobile, multiple notebooks, 50-source scale |
+| Studio: Summary, Auto-FAQ, **Audio Overview** (free browser TTS) | Streaming responses, agentic retrieval |
+| Conversation memory + suggested follow-up questions | — |
+| Evaluation harness — 20/20, zero hallucinations, measured | — |
 
 The single most important behavior to look at: **ask the assistant something your sources don't
 cover, and watch it refuse** — showing the closest material it found instead of inventing an answer.
@@ -96,18 +98,22 @@ Tunable knobs (all optional) live in `lib/config.ts` and can be overridden via e
 
 ```
 app/
-  page.tsx              3-pane UI (Sources | Chat | Insights)
+  page.tsx              3-pane UI (Sources | Chat | Studio)
   api/sources/          add / list / delete sources (+ /[id] for full text)
-  api/chat/             grounded Q&A with citations + abstention
+  api/chat/             grounded Q&A with citations, abstention, memory, follow-ups
+  api/summary/          grounded whole-document summary
   api/insights/         grounded, cited auto-FAQ
+  api/audio/            spoken overview script (played via free browser TTS)
+  api/seed/             load bundled sample document
 lib/
-  rag.ts                retrieval + two-gate abstention + answer/FAQ generation
+  rag.ts                retrieval + two-gate abstention + all generation
   store.ts              in-memory vector store (cosine search + persistence)
-  gemini.ts             embeddings + grounded JSON generation
+  gemini.ts             embeddings + grounded JSON generation (multi-key rotation)
   chunk.ts  extract.ts  ingest.ts  config.ts  types.ts
-components/             Sidebar, ChatPanel, InsightsPanel, SourceViewer, CitationText
+components/             Sidebar, ChatPanel, StudioPanel, SourceViewer, CitationText
+eval/                   evaluation harness (npm run eval) — 20/20, zero hallucinations
 ```
 
-## Possible next steps (intentionally out of scope here)
-YouTube transcript ingestion · agentic multi-hop retrieval for complex questions · streaming
-responses · an Audio Overview. Each was considered and deferred in favor of a rock-solid core.
+## Possible next steps
+Agentic multi-hop retrieval for complex questions · streaming responses ·
+managed vector DB for scale · per-user isolation and auth.
